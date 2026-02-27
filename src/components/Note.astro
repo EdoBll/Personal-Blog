@@ -1,0 +1,28 @@
+---
+interface Props {
+  type?: 'tip' | 'caution' | 'in-depth';
+  title?: string;
+}
+
+// src/components/Note.astro
+const { type = 'tip', title } = Astro.props;
+
+// Configurazione automatica di emoji e titoli di default in base al tipo
+const config = {
+  'tip': { defaultTitle: 'Tip', emoji: '💡' },
+  'caution': { defaultTitle: 'Caution', emoji: '⚠️' },
+  'in-depth': { defaultTitle: 'In-depth', emoji: '🔍' }
+};
+
+const currentConfig = config[type];
+const displayTitle = title || currentConfig.defaultTitle;
+const emoji = currentConfig.emoji;
+---
+
+<details class={`custom-note ${type}`}>
+  <summary>{emoji} {displayTitle}</summary>
+  <div class="note-content">
+    {/* Il tag <slot />: qui dentro finirà tutto il contenuto Markdown che andremo a scrivere! */}
+    <slot />
+  </div>
+</details>

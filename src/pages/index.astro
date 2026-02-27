@@ -1,0 +1,31 @@
+---
+import BaseHead from '../components/BaseHead.astro';
+import Footer from '../components/Footer.astro';
+import Header from '../components/Header.astro';
+import { SITE_DESCRIPTION, SITE_TITLE } from '../consts';
+---
+
+<!doctype html>
+<html lang="en">
+	<head>
+		<BaseHead title={SITE_TITLE} description={SITE_DESCRIPTION} />
+	</head>
+	<body>
+		<Header />
+		<main>
+			<h2>Welcome to my Personal Lab!</h2>
+		
+			<p>
+				I’m Edoardo, a cybersecurity engineer focused on IoT and embedded systems. 
+				Here I publish hands‑on pentests, projects, lab setups and clear remediation steps you can apply to real products.
+			</p>
+			
+			<p>
+				Content on this site is provided for informational and ethical use only. The author disclaims liability for misuse. Reproducing tests against systems you do not own or have explicit consent to test may be unlawful. Always obtain written authorization before performing security assessments.	
+			</p>
+			
+		
+		</main>
+		<Footer />
+	</body>
+</html>

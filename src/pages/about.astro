@@ -1,0 +1,32 @@
+---
+import AboutHeroImage from '../assets/blog-placeholder-about.jpg';
+import Layout from '../layouts/BlogPost.astro';
+---
+
+<Layout
+	title="About Me"
+	description="Junior Cybersecurity Engineer & System Admin"
+	pubDate={new Date('February 26 2026')}
+	heroImage={AboutHeroImage}
+>
+
+<style>
+	/* Nasconde la data e centra il testo */
+	.date {
+		display: none !important;
+	}
+</style>
+
+<p>Cybersecurity engineer with a background in System Administration and technical support, currently working in the Telco sector. I run penetration tests on both hardware—focusing on IoT devices and embedded systems—and software, focusing on vulnerabilities that affect real deployments. Driven by continuous learning, I publish in this Blog deep‑dive analyses, hands‑on walkthroughs and reproducible case studies that bridge theory and practice. 	
+</p>
+
+<ul>
+	<p>🛡️ Core Expertise:
+		<li>Hardware & IoT Hacking: Penetration testing on embedded systems and IoT devices.</li>
+		<li>System Administration and Networking</li>
+		<li>Technical Reporting: Translating exploits into clear, actionable insights.</li>
+	</p>
+</ul>
+
+
+</Layout>
