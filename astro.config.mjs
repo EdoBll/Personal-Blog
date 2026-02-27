@@ -6,7 +6,7 @@ import { defineConfig } from 'astro/config';
 
 // https://astro.build/config
 export default defineConfig({
-  site: 'https://edoardobll.github.io',
+  site: 'https://edobll.github.io',
   base: '/Personal-Blog',
   integrations: [mdx(), sitemap()],
 });
