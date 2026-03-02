@@ -72,9 +72,11 @@ rsn_pairwise=CCMP
 country_code=IT
 ```
 This configuration defines a Wi‑Fi network on **wlan1**  with SSID **IoT_Monitor_AP**, operating under IEEE 802.11g at 2.4 GHz on channel 6 (2437 MHz) to avoid the commonly used channels 1 and 11. Security is provided by WPA2 (IEEE 802.11i) with AES encryption; authentication is handled via a pre‑shared key (PSK) rather than an external server. Setting the country code ensures compliance with local frequency regulations and improves signal stability.
-<br />
+
 It is advisable to start from this basic configuration. Additional option can be added later, for example:
+
 ``ieee80211n=1`` -> enable 802.11n support for improved performance on modern devices.
+
 ``ap_isolate=1`` -> enable client isolation so IoT devices communicate only with the monitoring server and not with each other.
 
 Now, point the **hostapd** daemon to the configuration file by updating **/etc/default/hostapd** with:
@@ -175,3 +177,4 @@ sudo cat /var/lib/dhcp/dhcpd.leases
 These commands help identify whether the problem is caused by missing dependencies, interfaces that are not ready, configuration errors in the file, or permissions/locks on the lease file.
 </Note>
 
+<br />
