@@ -86,7 +86,7 @@ Let's create a new Ethernet connection profile with a static IP using (including
 ```bash
 sudo nmcli connection add type ethernet ifname eth0 con-name static-eth0 ipv4.addresses 10.10.10.1/24 ipv4.gateway 10.10.10.254 ipv4.dns "8.8.8.8,8.8.4.4" ipv4.method manual autoconnect yes
 ```
-If no gateway is required, simply omit ipv4.gateway. In this case:
+If no gateway is required, simply omit "ipv4.gateway". In this case:
 
 ```bash
 sudo nmcli connection add type ethernet ifname eth0 con-name static-eth0 ipv4.addresses 10.10.10.1/24 ipv4.dns "8.8.8.8,8.8.4.4" ipv4.method manual autoconnect yes
@@ -152,7 +152,7 @@ The Raspberry Pi is configured as a router/NAT connecting two networks: the LAN 
 - Set firewall rules to allow required traffic and block the rest.
 <br />
 
-Persistently enable IPv4 forwarding by adding or uncommenting the following line in **/etc/ufw/sysctl.conf**:
+The first step consist into enable persistent IPv4 forwarding by adding or uncommenting the following line in **/etc/ufw/sysctl.conf**:
 ```bash
 net/ipv4/ip_forward=1 .
 ```
@@ -212,7 +212,7 @@ Instead if multiple devices are connected and is needed to limit the capture to 
 ```bash
 sudo tcpdump -i eth0 host 10.10.10.2 -w /tmp/device.pcap
 ```
-Alternatively, use *tshark* for filtered capture and text output:
+Alternatively, use *tshark* for a filtered capture and text output:
 ```bash
 sudo tshark -i eth0 -f "host 10.10.10.2" -w /tmp/device.pcap			 
 sudo tshark -r /tmp/device.pcap -Y "http" -T fields -e ip.src -e http.host
