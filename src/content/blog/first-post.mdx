@@ -81,7 +81,7 @@ Before the advent of **Netplan** (a network configuration abstractor), configuri
 
 </Note>
 
-Let's create a new Ethernet connection profile with a static IP using (including DNS and optional gateway):
+Let's create a new Ethernet connection profile with a static IP (including DNS and optional gateway):
 
 ```bash
 sudo nmcli connection add type ethernet ifname eth0 con-name static-eth0 ipv4.addresses 10.10.10.1/24 ipv4.gateway 10.10.10.254 ipv4.dns "8.8.8.8,8.8.4.4" ipv4.method manual autoconnect yes
