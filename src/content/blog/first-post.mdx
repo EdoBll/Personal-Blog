@@ -1,5 +1,5 @@
 ---
-title: 'MITM Monitoring with Raspberry Pi'
+title: 'MITM Monitoring using a Raspberry Pi'
 description: ''
 pubDate: 'Feb 27 2026'
 heroImage: '../../assets/MITM copertina2.png'
@@ -9,7 +9,7 @@ import mitmDiagram from '../../assets/MITM diagram not complete.png';
 import Note from '../../components/Note.astro';
 
 <p>
-Assuming a Raspberry Pi running a compatible Linux distribution (Ubuntu, Raspbian or similar), this article shows how to configure the device as a man‑in‑the‑middle (MITM) monitor to observe traffic from any client attached to its LAN port. By connecting the Pi’s Wi‑Fi interface to a router with Internet access, the device can sit between the router and a target client (for example, a PC or an IoT device), capturing and analysing packets on the Ethernet link. Captured traffic can be inspected and recorded by monitoring tools and then forwarded to the upstream router via the wireless uplink. This setup is useful for studying smart‑device behaviour, verifying whether data is transmitted in clear text, and identifying contacted services. It is intended for developers and security analysts performing **authorised and controlled testing**.
+Assuming a Raspberry Pi running a compatible Linux distribution (Ubuntu, Raspbian or similar), this article explain how to configure the device as a man‑in‑the‑middle (MITM) monitor to observe traffic from any client connected to its LAN port. By connecting the Raspberry’s Wi‑Fi interface to an Internet connected router, the device sits between the router and the target client (for example, a PC or an IoT device), capturing and analysing packets on the Ethernet link. Captured traffic can be inspected and recorded by monitoring tools and then forwarded to the upstream router via the wireless uplink. This setup is useful for studying smart‑device behaviour, verifying whether data is transmitted in clear text and identifying contacted services and endpoints. It is intended for developers and security analysts performing **authorised and controlled testing**.
 </p>
 
 <p> 
@@ -19,40 +19,39 @@ Assuming a Raspberry Pi running a compatible Linux distribution (Ubuntu, Raspbia
 <br />
 
 <h4>1. Connecting Raspberry Pi to Internet</h4>
-The first step is to connect our Linux server to a WiFi network using NetworkManager and its command-line client, nmcli. To avoid conflicts with Netplan, it's important to ensure the system is actually using NetworkManager as a renderer. If present, Netplan must be configured to delegate management to NetworkManager:
+The first step is to connect the Linux server to a WiFi network using NetworkManager and its command-line client, **nmcli**. To avoid conflicts with Netplan, ensure the system is configured to use NetworkManager as the renderer. If Netplan is present, it must be configured to delegate management to NetworkManager:
 
 ```bash
 ls /etc/netplan
 ```
 
-If you have any .yaml files, you can remove them or, alternatively, open them and check that the “renderer” line is set to:
+If any .yaml files are present, remove them or edit them so that the "renderer" line reads:
 
 ```bash
 renderer: NetworkManager
 ```
 
-Once this first preliminary phase has been completed, we will list the network interfaces recognized by the kernel:
+After this preliminary phase, list the network interfaces recognized by the kernel:
 
 ```bash
 ls /sys/class/net
 ```
 
-To quickly connect the device to a Wi-Fi network we can use the command:
+To quickly connect the device to a Wi‑Fi network, run:
 
 ```bash
 sudo nmcli device wifi connect "SSID_name" password "password" ifname wlan0
 ```
 
-This will create a connection profile and immediately attempt to connect to the specified point. If you prefer, there's also a more robust method that involves first creating an explicit profile with the desired parameters (SSID, security method, any IPv4/IPv6 settings) and then activating it.
+This command creates a connection profile and immediately attempts to connect to the specified access point. Alternatively, create an explicit profile with the desired parameters (SSID, security method, IPv4/IPv6 settings) and then activate it:
 
 ```bash
 sudo nmcli connection add type wifi ifname wlan0 con-name SSID_name-Profile ssid "SSID_name"
 sudo nmcli connection modify SSID_name-Profile i wifi-sec.key-mgmt wpa-psk wifi-sec.psk "password" ipv4.method auto autoconnect yes
-sudo nmcli connection up my-wifi
+sudo nmcli connection up SSID_name
 ```
 
-This approach is useful if you want to be able to easily change the profile later (for example, set DNS or static IP) without touching the active connection.
-After applying the connection, its status is checked:
+This approach is useful when the profile needs to be modified later (for example, to set DNS or a static IP) without altering the active connection. After applying the connection, verify its status:
 
 ```bash
 nmcli device status
@@ -60,21 +59,20 @@ nmcli connection show --active
 ip addr show wlan0
 ```
 
-These commands check that NetworkManager has actually associated the wlan0 interface with the specified wireless network, that the profile is active and that an IP address has been assigned via DHCP (or a static value, if set).
+These commands confirm that NetworkManager has associated the wlan0 interface with the specified wireless network, that the profile is active, and that an IP address has been assigned via DHCP (or a static address, if configured).
 
 <br />
 <br />
-<h4>2. Setting up the DHCP server</h4>
+<h4>2. DHCP Server configuration</h4>
 
-At this point, we need to configure the Raspberry Pi's Ethernet interface to function as a DHCP server. We'll set the eth0 port as a static LAN interface (e.g., 10.10.10.1/24) and run a DHCP server (isc-dhcp-server) on it to assign addresses to devices connected via Ethernet. Meanwhile, the Wi-Fi interface (wlan0) remains connected to the external network and acts as an uplink to the Internet. Let's look at the complete steps:
+A static LAN address must be assigned to the Raspberry Pi’s Ethernet interface (for example, 10.10.10.1/24) and a DHCP server (*isc-dhcp-server*) must be run on that interface to provide IP addresses to devices connected via Ethernet. The Wi‑Fi interface (wlan) remains connected to the external network and acts as the uplink to the Internet.
 
 ```bash
 sudo apt update				
 sudo apt install isc-dhcp-server
 ```
 
-*isc-dhcp-server* is the most widely used package on Debian/Ubuntu for running the DHCP daemon.
-This will allow us to have a DHCP server running on the Raspberry Pi and therefore automatically assign IP addresses, gateways, and DNS to clients connected via the Ethernet port.
+The **isc-dhcp-server** package provides the DHCP daemon commonly used on Debian/Ubuntu systems and enables automatic assignment of IP addresses, gateways and DNS to clients on the Ethernet port. This will allow us to have a DHCP server running on the Raspberry Pi and therefore automatically assign IP addresses, gateways and DNS to clients connected via the Ethernet port.
 
 <Note type="in-depth">
 
@@ -83,32 +81,40 @@ Before the advent of **Netplan** (a network configuration abstractor), configuri
 
 </Note>
 
-Let's create a new Ethernet connection with a static IP using the command:
+Let's create a new Ethernet connection profile with a static IP using (including DNS and optional gateway):
+
 ```bash
 sudo nmcli connection add type ethernet ifname eth0 con-name static-eth0 ipv4.addresses 10.10.10.1/24 ipv4.gateway 10.10.10.254 ipv4.dns "8.8.8.8,8.8.4.4" ipv4.method manual autoconnect yes
 ```
-This command creates a profile called **static-eth0**, assigns the address 10.10.10.1 to the eth0 interface, and sets the gateway and DNS. If you don't want to specify the gateway, simply omit ipv4.gateway. In our case, we'll use:
+If no gateway is required, simply omit ipv4.gateway. In this case:
+
 ```bash
 sudo nmcli connection add type ethernet ifname eth0 con-name static-eth0 ipv4.addresses 10.10.10.1/24 ipv4.dns "8.8.8.8,8.8.4.4" ipv4.method manual autoconnect yes
 ```
-We can then check if the operation was successful using the following commands:
+Verify the connection and the assigned address:
+
 ```bash
 nmcli device status
 nmcli connection show static-eth0
 ip addr show eth0
 ```
-At this point, to ensure that the DHCP server daemon ( **isc‑dhcp‑server** ) knows which interface to listen on, you edit the startup settings configuration file:
+At this point, to ensure that the DHCP server daemon ( **isc‑dhcp‑server** ) knows which interface to listen on, specify the interface by editing the startup configuration:
+
 ```bash
 sudoedit /etc/default/isc-dhcp-server
 ```
-Inside that file, set the variable that indicates the IPv4 interface:
+Inside that file, set the IPv4 interface variable:
 
 ```bash
 INTERFACESv4="eth0"  
 #INTERFACESv6="" 
 ```
-The heart of the DHCP server configuration lies in the **/etc/dhcp/dhcpd.conf file**, which we'll now configure according to our needs. Before making any changes, however, it's a good idea to create a copy (so you can undo it if necessary):  sudo cp /etc/dhcp/dhcpd.conf /etc/dhcp/dhcpd.conf.bak 
-<br />Now we can modify the values ​​in the original file (/etc/dhcp/dhcpd.conf) by inserting:
+
+<Note type="tip">
+The heart of the DHCP server configuration lies in the **/etc/dhcp/dhcpd.conf file**, which we'll now configure according to our needs. Before making any changes, however, it's a good idea to create a copy (so you can undo it if necessary):  ``sudo cp /etc/dhcp/dhcpd.conf /etc/dhcp/dhcpd.conf.bak`` 
+</Note>
+
+Now, insert or replace the following minimal configuration in (**/etc/dhcp/dhcpd.conf**):
 ```bash
 # Global settings					
 option domain-name "local";				
@@ -126,11 +132,12 @@ subnet 10.10.10.0 netmask 255.255.255.0 {
   option broadcast-address 10.10.10.255;		
 } 	
 ```
-To make sure that the file we just edited is syntax correct, we run:
+To make sure that the file just edited is syntax correct:
 ```bash
 sudo dhcpd -t -cf /etc/dhcp/dhcpd.conf
 ```
-We can finally physically connect the client (PC, IoT device) we want to monitor to the Ethernet port. Restart the DHCP daemon and check its status:
+Finally, physically connect the client (PC, IoT device) to the Ethernet port and start and verify the DHCP service:
+
 ```bash
 sudo systemctl restart isc-dhcp-server
 ```
@@ -138,13 +145,14 @@ sudo systemctl restart isc-dhcp-server
 <br />
 <br />
 <h4>3. Let's make the Raspberry Pi a router</h4>
-We've transformed the Raspberry Pi into a router/NAT that connects two networks: the LAN (eth0) and the WAN (wlan0). The DHCP server is already able to assign addresses to clients on the LAN, but it still doesn't allow those clients to go out onto the Internet by routing and masking (NAT) traffic through the WAN. To achieve this, we'll:
+The Raspberry Pi is configured as a router/NAT connecting two networks: the LAN (eth0) and the WAN (wlan0). The DHCP server is already able to assign addresses to clients on the LAN, but it still doesn't allow those clients to go out onto the Internet by routing and masking (NAT) traffic through the WAN. To enable this functionality, perform the following steps:
+
 - Enable persistent IP forwarding in the kernel
 - Configure NAT to translate LAN addresses into WAN addresses
-- Set firewall rules that allow the necessary traffic to pass through and block the rest.
+- Set firewall rules to allow required traffic and block the rest.
 <br />
 
-To enable IP forwarding we will edit the  **/etc/ufw/sysctl.conf**  file, activating (or writing) the following line inside it:
+Persistently enable IPv4 forwarding by adding or uncommenting the following line in **/etc/ufw/sysctl.conf**:
 ```bash
 net/ipv4/ip_forward=1 .
 ```
@@ -154,17 +162,14 @@ This file is provided precompiled and commented (or empty on some distro) and is
 ``sudo apt install ufw -y``
 </Note>
 
-After writing the sysctl.conf file, we then apply the change using the command:
+Apply the change and verify the kernel setting:
 ```bash
 sudo sysctl -p /etc/ufw/sysctl.conf
-```
-and verify that the kernel now has IP forwarding active via:
-```bash
 sysctl net.ipv4.ip_forward
+# expected output: net.ipv4.ip_forward = 1
 ```
-which will have to give us back: ``net.ipv4.ip_forward = 1``
 
-Let's now ensure SSH access with the command:
+Allow SSH through the firewall before enabling UFW:
 ```bash
 sudo ufw allow ssh
 ```
@@ -172,12 +177,12 @@ sudo ufw allow ssh
 It's very important to perform this last step now (before enabling ufw) so as not to destroy the SSH connection we initially established. Otherwise, we would be cut off from the Raspberry Pi!
 </Note>
 
-Only now can we proceed to enable UFW:
+Only now, enable UFW and check its status:
 ```bash
 sudo ufw enable
 sudo ufw status verbose
 ```
-Now let's enable NAT from UFW. All you need to do is edit the /ect/ufw/before.rules file, inserting the NAT block before the *filter section:
+Now let's enable NAT from UFW. Edit /ect/ufw/before.rules and insert the NAT block before the *filter section:
 ```bash
 # NAT table rules							
 *nat										
@@ -186,15 +191,16 @@ Now let's enable NAT from UFW. All you need to do is edit the /ect/ufw/before.ru
 -A POSTROUTING -s 10.10.10.0/24 -o wlan0 -j MASQUERADE	
 COMMIT	
 ```
-Next, set the forwarding policy ``DEFAULT_FORWARD_POLICY= “ACCEPT”`` in **/etc/default/ufw** and refresh UFW by running:
+Set the forwarding policy ``DEFAULT_FORWARD_POLICY= “ACCEPT”`` in **/etc/default/ufw** and reload UFW to apply the changes:
 
 ```bash
 sudo ufw disable			
 sudo ufw enable			
 sudo ufw status verbose 	
 ```
-Our Raspberry system has now become not only a DHCP server but also a router capable of forwarding network traffic between a device connected to its Ethernet port and the actual router providing Internet access. This configuration allows us to use the Raspberry as a transparent intermediary capable of intercepting and recording communications between the target client (PC, IoT device, etc.) and the gateway, for monitoring, debugging, or network traffic analysis purposes.
-Operationally, to print the complete (and real-time) capture of the eth0 interface to the terminal, we can use:
+At this point the Raspberry Pi functions as both a DHCP server and a router, forwarding traffic between devices connected to its Ethernet port and the upstream Internet gateway. This configuration enables the device to act as a transparent intermediary for monitoring, debugging, or network traffic analysis.
+Operationally, to display a live capture of traffic on the eth0 interface:
+
 ```bash
 sudo tcpdump -i eth0
 ```
@@ -202,16 +208,16 @@ However, capturing traffic passing through the eth0 interface can also be done b
 ```bash
 sudo tcpdump -i eth0 -w /tmp/test.pcap
 ```
-If instead we had multiple devices connected and we wanted to limit the capture to a specific IP address then we would use:
+Instead if multiple devices are connected and is needed to limit the capture to a specific IP address:
 ```bash
 sudo tcpdump -i eth0 host 10.10.10.2 -w /tmp/device.pcap
 ```
-Alternatively we could use tshark for a filtered capture and text output:
+Alternatively, use *tshark* for filtered capture and text output:
 ```bash
 sudo tshark -i eth0 -f "host 10.10.10.2" -w /tmp/device.pcap			 
 sudo tshark -r /tmp/device.pcap -Y "http" -T fields -e ip.src -e http.host
 ```
-The configurations we have performed so far are persistent and allow us to reboot the device without risking losing the obtained functionality.
+The configuration changes described above are persistent and survive reboots, without risking losing the obtained functionality.
 
 <Note type="tip">
 Upon reboot, it might be useful to verify what we just said. To do so, we'll use the following commands:
