@@ -1,0 +1,21 @@
+---
+title: 'MITM Monitoring using a Raspberry Pi'
+description: ''
+pubDate: 'Feb 27 2026'
+heroImage: '../../assets/MITM copertina2.png'
+---
+import { Image } from 'astro:assets';
+import mitmDiagram from '../../assets/MITM diagram not complete.png';
+import Note from '../../components/Note.astro';
+
+<p>
+Assuming a Raspberry Pi running a compatible Linux distribution (Ubuntu, Raspbian or similar), this article explain how to configure the device as a man‑in‑the‑middle (MITM) monitor to observe traffic from any client connected to its LAN port. By connecting the Raspberry’s Wi‑Fi interface to an Internet connected router, the device sits between the router and the target client (for example, a PC or an IoT device), capturing and analysing packets on the Ethernet link. Captured traffic can be inspected and recorded by monitoring tools and then forwarded to the upstream router via the wireless uplink. This setup is useful for studying smart‑device behaviour, verifying whether data is transmitted in clear text and identifying contacted services and endpoints. It is intended for developers and security analysts performing **authorised and controlled testing**.
+</p>
+
+<p> 
+<Image src={mitmDiagram} alt="MITM diagram not complete" />
+</p>
+
+<br />
+
+<h4>4. Connecting the Raspberry Pi to Internet</h4>
