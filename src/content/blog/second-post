@@ -1,0 +1,48 @@
+---
+title: 'MITM Monitoring using a Raspberry Pi'
+description: ''
+pubDate: 'Feb 27 2026'
+heroImage: '../../assets/MITM copertina2.png'
+---
+import { Image } from 'astro:assets';
+import mitmDiagram from '../../assets/MITM diagram not complete.png';
+import Note from '../../components/Note.astro';
+
+<p>
+Assuming a Raspberry Pi running a compatible Linux distribution (Ubuntu, Raspbian or similar), this article explain how to configure the device as a man‑in‑the‑middle (MITM) monitor to observe traffic from any client connected to its LAN port. By connecting the Raspberry’s Wi‑Fi interface to an Internet connected router, the device sits between the router and the target client (for example, a PC or an IoT device), capturing and analysing packets on the Ethernet link. Captured traffic can be inspected and recorded by monitoring tools and then forwarded to the upstream router via the wireless uplink. This setup is useful for studying smart‑device behaviour, verifying whether data is transmitted in clear text and identifying contacted services and endpoints. It is intended for developers and security analysts performing **authorised and controlled testing**.
+</p>
+
+<p> 
+<Image src={mitmDiagram} alt="MITM diagram not complete" />
+</p>
+
+<br />
+
+<h4>4.  Creating a Wi‑Fi Access Point for MITM monitoring</h4>
+An additional USB Wi‑Fi interface must be connected to the Raspberry Pi to create an access point (AP).The resulting setup uses wlan0 as the client interface connected to the real Wi‑Fi router (providing Internet to the Raspberry Pi), while **wlan1** becomes the local Access Point serving wireless devices. As with the eth0 interface, wlan1 must use the Raspberry Pi’s internal DHCP service and forward/NAT traffic toward wlan0.
+<br />
+Before applying any new configuration, create backups of the network settings applied in previous steps and verify the available network interfaces:
+
+```bash
+sudo cp /etc/dhcp/dhcpd.conf /root/dhcpd.conf.backup
+sudo iptables-save > /root/iptables.backup
+ip addr show
+ip route show
+```
+IP forwarding has already been enabled previously, so those steps are not repeated here. The remaining task is to enable NAT in UFW. Edit **/ect/ufw/before.rules** and insert the NAT block before the *filter section. The NAT rules previously added for eth0 must be extended to include wlan1. For example:
+
+```bash
+# NAT table rules
+*nat
+:POSTROUTING ACCEPT [0:0]
+
+# Masquerade LAN -> WAN (eth0)
+-A POSTROUTING -s 10.10.10.0/24 -o wlan0 -j MASQUERADE
+
+# Masquerade LAN -> WAN (wlan1)
+-A POSTROUTING -s 10.10.11.0/24 -o wlan0 -j MASQUERADE
+
+COMMIT
+```
+Persistent IPv4 forwarding must be enabled by adding or uncommenting the line #net.ipv4.ip_forward=1.
+
