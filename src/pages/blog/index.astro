@@ -18,18 +18,25 @@ const posts = (await getCollection('blog')).sort(
 		<BaseHead title={SITE_TITLE} description={SITE_DESCRIPTION} />
 		<style>
 			main {
-				width: 960px;
-			}
+    			width: 100%;
+    			max-width: 960px;    /* Impedisce che diventi troppo grande */
+    			margin: 0 auto;      /* IL SEGRETO: centra il blocco orizzontalmente */
+    			padding: 3em 1rem;   /* Dà respiro ai lati su mobile */
+    			box-sizing: border-box;
+				}
+
 			ul {
-				display: flex;
-				flex-wrap: wrap;
-				gap: 2rem;
-				list-style-type: none;
-				margin: 0;
-				padding: 0;
-			}
+    			display: flex;
+    			flex-wrap: wrap;
+    			gap: 2rem;
+    			list-style-type: none;
+    			margin: 0;
+    			padding: 0;
+    			justify-content: center; /* Centra le card se l'ultima riga ne ha solo una */
+				}
+
 			ul li {
-				width: calc(50% - 1rem);
+    			width: calc(50% - 1rem);
 			}
 			ul li * {
 				text-decoration: none;
