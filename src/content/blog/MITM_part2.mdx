@@ -27,7 +27,7 @@ sudo iptables-save > /root/iptables.backup
 ip addr show
 ip route show
 ```
-***Enable NAT in UFW for wlan1 as well***
+**Enable NAT in UFW for wlan1 as well**
 IP forwarding has already been enabled previously, so those steps are not repeated here. The remaining task is to enable NAT in UFW. Edit **/ect/ufw/before.rules** and insert the NAT block before the *filter section. The NAT rules previously added for eth0 must be extended to include wlan1. For example:
 
 ```bash
@@ -44,4 +44,12 @@ IP forwarding has already been enabled previously, so those steps are not repeat
 COMMIT
 ```
 Persistent IPv4 forwarding must be enabled by adding or uncommenting the line ``#net.ipv4.ip_forward=1``.
+
+**Installing and configuring the Access Point daemon**
+To create an access point (AP), install hostapd (Host Access Point Daemon), a program that converts a standard Wi‑Fi network adapter into a wireless Access Point or an authentication server. It supports WPA2 and WPA3, AES encryption and RADIUS authentication for enterprise networks.
+
+```bash
+sudo apt install hostapd
+```
+
 
