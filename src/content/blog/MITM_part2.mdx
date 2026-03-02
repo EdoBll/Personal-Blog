@@ -9,11 +9,11 @@ import mitmDiagram from '../../assets/MITM diagram not complete.png';
 import Note from '../../components/Note.astro';
 
 <p>
-This second article on Raspberry Pi–based MITM monitoring describes how to add a Wi‑Fi access point that target devices can use instead of the Ethernet port, and how to deploy an external proxy to handle HTTP and HTTPS traffic.
+This second article on Raspberry Pi–based MITM monitoring describes how to add a Wi‑Fi access point that target devices can use instead of the Ethernet port.
 It is recommended to read the *first part* before continuing.
-<p> 
-<Image src={mitmDiagram} alt="MITM diagram not complete" />
 </p>
+
+<Image src={mitmDiagram} alt="MITM diagram not complete" />
 
 <br />
 
@@ -81,6 +81,87 @@ Now, point the **hostapd** daemon to the configuration file by updating **/etc/d
 ```bash
 sudo sed -i 's|#DAEMON_CONF=""|DAEMON_CONF="/etc/hostapd/hostapd.conf"|' /etc/default/hostapd
 ```
+<br />
+**Adding DHCP server settings**
+The DHCP server must be configured to manage the subnet assigned to interface wlan1 and to provide the related network parameters. Edit **/etc/dhcp/dhcp.conf** and add the following block:
+```bash
+# Subnet served by wlan1 – Raspberry
+subnet 192.168.50.0 netmask 255.255.255.0 {
+  range 192.168.50.10 192.168.50.200;
+  option routers 192.168.50.1;
+  option subnet-mask 255.255.255.0;
+  option broadcast-address 192.168.50.255;
+}
+```
+To ensure that clients connecting to the Wi‑Fi network receive an IP address, the **isc-dhcp-server** service (which uses /etc/dhcp/dhcp.conf) must be instructed to listen on wlan1. Add or update the service configuration with:
+```bash
+INTERFACESv4="eth0 wlan1"
+```
+<br />
+**Assigning a static IP to wlan1, enabling the interface and AP**
+It's time to configure NetworkManager so that it does not fully manage wlan1, since hostapd and NetworkManager can conflict if both try to control the same interface. Marking wlan1 as unmanaged (with nmcli) prevents NetworkManager from overriding settings or accepting temporary DHCP leases:
+```bash
+sudo nmcli device set wlan1 managed no
+```
+Add the following block to **/etc/NetworkManager/NetworkManager.conf** (or the appropriate distribution file) to make the unmanaged rule for wlan1 <u>permanent</u> and to disable MAC address randomization during scans.
+```bash
+[main]
+plugins=ifupdown,keyfile
+
+[ifupdown]
+managed=false
+
+[device]
+wifi.scan-rand-mac-address=no
+
+[keyfile]
+unmanaged-devices=interface-name:wlan1
+```
+<Note type="in-depth">
+- Declaring wlan1 unmanaged avoids race conditions where NetworkManager takes control before hostapd or dhcpd configure the interface.
+- Disabling scan MAC randomization (``wifi.scan-rand-mac-address=no``) helps maintain consistent MAC behavior for AP operation and monitoring.
+- Assigning 192.168.50.1/24 to wlan1 matches the DHCP subnet previously configured for the AP. Adjust the address if a different subnet is used.
+</Note>
+
+To make the static IP assignment for wlan1 persistent, the system must be instructed to apply the address automatically at each boot. Although a `systemd service` is a modern and elegant approach, it can introduce timing and dependency issues during hardware initialization that may prevent reliable IP assignment at boot; for this reason that approach is avoided here. A simpler and more reliable solution on Raspbian / Raspberry Pi OS is to use **/etc/dhcpcd.conf**. Append the following to the end of that file:
+```bash
+# Static configuration for AP on wlan1
+interface wlan1
+static ip_address=192.168.50.1/24
+# do not set static routers or dns here for wlan1
+
+interface eth0
+nogateway
+```
+These rules ensure that wlan1 always has the AP address before hostapd and isc‑dhcp‑server start. They also prevent dhcpcd from assigning a gateway on eth0, avoiding overwriting the default route when another interface (for example wlan0) must act as the Internet gateway. Together with the change in NetworkManager.conf (which declares wlan1 unmanaged), these settings prevent multiple agents (NetworkManager, dhcpcd, hostapd) from interfering with each other and causing duplicate IP assignments or unwanted leases.
+<br />
+At this point, restart the hostapd daemon:
+```bash
+sudo systemctl restart hostapd
+```
+Then create or edit the `systemd override` for the DHCP service at **/etc/systemd/system/isc-dhcp-server.service.d/override.conf** and add the unit dependencies:
+```bash
+[Unit]
+After=network-online.target NetworkManager.service dhcpcd.service hostapd.service
+Requires=network-online.target hostapd.service
+```
+This forces systemd to start the DHCP server only after the network is considered online and the AP (hostapd) is running, preventing the DHCP service from starting when its prerequisites are not met.
+The access point and all required services are now running and is possible to connect target devices to perform dynamic monitoring. To ensure every necessary service will start automatically after the next reboot, verify their enabled state:
+```bash
+systemctl is-enabled hostapd wlan1-static isc-dhcp-server
+```
+The command should return `enabled` three times. With the services enabled and the AP active, the system is ready to monitor traffic on wlan1 as well as eth0. Test connectivity and capture traffic with:
+```bash
+sudo tcpdump -i wlan1
+```
+
+<Note type="tip">
+Sometimes the Wi‑Fi and Ethernet interfaces are up but the DHCP server does not assign IP addresses; in that case, first reload systemd and restart the DHCP service:
+```bash
+sudo systemctl daemon-reload
+sudo systemctl restart isc-dhcp-server
+```
+This quick step often restores DHCP operation but, if the problem persists, check:
 
 
 
