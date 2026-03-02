@@ -51,5 +51,36 @@ To create an access point (AP), install hostapd (Host Access Point Daemon), a pr
 ```bash
 sudo apt install hostapd
 ```
+Do not start the service immediately; the daemon must be configured first. On many distributions (for example Raspberry Pi OS or Ubuntu) the package attempts to start  automatically after installation. For safety, disable the related services:
+
+```bash
+sudo systemctl unmask hostapd  # -> Removes any mask on the hostapd service so that the service can be started (manually or as a dependency).
+sudo systemctl disable hostapd  # -> Prevents the hostapd service from starting automatically at boot.
+sudo systemctl stop hostapd  # -> Attempts to stop the running hostapd process immediately
+```
+Then, create the hostapd configuration file (or edit it if it already exists) at **/etc/hostapd/hostapd.conf** adding the following parameters:
+
+```bash
+interface=wlan1
+ssid=IoT_Monitor_AP
+hw_mode=g
+channel=6
+wpa=2
+wpa_key_mgmt=WPA-PSK
+wpa_passphrase=choose_a_password
+rsn_pairwise=CCMP
+country_code=IT
+```
+This configuration defines a Wi‑Fi network on **wlan1**  with SSID **IoT_Monitor_AP**, operating under IEEE 802.11g at 2.4 GHz on channel 6 (2437 MHz) to avoid the commonly used channels 1 and 11. Security is provided by WPA2 (IEEE 802.11i) with AES encryption; authentication is handled via a pre‑shared key (PSK) rather than an external server. Setting the country code ensures compliance with local frequency regulations and improves signal stability.
+<br />
+It is advisable to start from this basic configuration. Additional option can be added later, for example:
+``ieee80211n=1`` -> enable 802.11n support for improved performance on modern devices.
+``ap_isolate=1`` -> enable client isolation so IoT devices communicate only with the monitoring server and not with each other.
+
+Now, point the **hostapd** daemon to the configuration file by updating **/etc/default/hostapd** with:
+```bash
+sudo sed -i 's|#DAEMON_CONF=""|DAEMON_CONF="/etc/hostapd/hostapd.conf"|' /etc/default/hostapd
+```
+
 
 
