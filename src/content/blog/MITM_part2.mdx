@@ -17,7 +17,7 @@ It is recommended to read the *first part* before continuing.
 
 <br />
 
-<h4>4.  Creating a Wi‑Fi Access Point for MITM monitoring</h4>
+<h4>4. Creating a Wi‑Fi Access Point for MITM monitoring</h4>
 An additional USB Wi‑Fi interface must be connected to the Raspberry Pi to create an access point (AP).The resulting setup uses wlan0 as the client interface connected to the real Wi‑Fi router (providing Internet to the Raspberry Pi), while **wlan1** becomes the local Access Point serving wireless devices. As with the eth0 interface, wlan1 must use the Raspberry Pi’s internal DHCP service and forward/NAT traffic toward wlan0.
 Before applying any new configuration, create backups of the network settings applied in previous steps and verify the available network interfaces:
 
@@ -162,6 +162,16 @@ sudo systemctl daemon-reload
 sudo systemctl restart isc-dhcp-server
 ```
 This quick step often restores DHCP operation but, if the problem persists, check:
+```bash
+# verify the service status:
+sudo systemctl status isc-dhcp-server
 
+# check the logs for errors:
+sudo journalctl -u isc-dhcp-server --no-pager -n 200
 
+# check the lease file to see whether leases have been issued:
+sudo cat /var/lib/dhcp/dhcpd.leases
+```
+These commands help identify whether the problem is caused by missing dependencies, interfaces that are not ready, configuration errors in the file, or permissions/locks on the lease file.
+</Note>
 
