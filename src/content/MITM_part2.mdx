@@ -18,4 +18,31 @@ Assuming a Raspberry Pi running a compatible Linux distribution (Ubuntu, Raspbia
 
 <br />
 
-<h4>4. Connecting the Raspberry Pi to Internet</h4>
+<h4>4.  Creating a Wi‑Fi Access Point for MITM monitoring</h4>
+An additional USB Wi‑Fi interface must be connected to the Raspberry Pi to create an access point (AP).The resulting setup uses wlan0 as the client interface connected to the real Wi‑Fi router (providing Internet to the Raspberry Pi), while **wlan1** becomes the local Access Point serving wireless devices. As with the eth0 interface, wlan1 must use the Raspberry Pi’s internal DHCP service and forward/NAT traffic toward wlan0.
+<br />
+Before applying any new configuration, create backups of the network settings applied in previous steps and verify the available network interfaces:
+
+```bash
+sudo cp /etc/dhcp/dhcpd.conf /root/dhcpd.conf.backup
+sudo iptables-save > /root/iptables.backup
+ip addr show
+ip route show
+```
+IP forwarding has already been enabled previously, so those steps are not repeated here. The remaining task is to enable NAT in UFW. Edit **/ect/ufw/before.rules** and insert the NAT block before the *filter section. The NAT rules previously added for eth0 must be extended to include wlan1. For example:
+
+```bash
+# NAT table rules
+*nat
+:POSTROUTING ACCEPT [0:0]
+
+# Masquerade LAN -> WAN (eth0)
+-A POSTROUTING -s 10.10.10.0/24 -o wlan0 -j MASQUERADE
+
+# Masquerade LAN -> WAN (wlan1)
+-A POSTROUTING -s 10.10.11.0/24 -o wlan0 -j MASQUERADE
+
+COMMIT
+```
+Persistent IPv4 forwarding must be enabled by adding or uncommenting the line #net.ipv4.ip_forward=1.
+
