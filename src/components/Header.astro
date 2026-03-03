@@ -47,6 +47,7 @@ import SocialLinks from './SocialLinks.astro';
 		background: var(--background-body, white);
 		box-shadow: 0 2px 8px rgba(var(--black), 5%);
 		position: relative;
+		z-index: 20;
 	}
 
 	nav {
@@ -59,59 +60,59 @@ import SocialLinks from './SocialLinks.astro';
 	h2 {
 		margin: 0;
 		font-size: 1.1em;
-	}
-
-	h2 a {
-		text-decoration: none;
-		color: var(--black);
+		z-index: 30;
 	}
 
 	.internal-links {
 		display: flex;
 		gap: 20px;
+		transition: all 0.3s ease;
 	}
 
 	.header-controls {
 		display: flex;
 		align-items: center;
-		gap: 1em;
+		gap: 12px; /* Spazio tra tema e hamburger */
+		z-index: 30;
 	}
 
 	.menu-button {
 		display: none; /* Nascosto su desktop */
-		background: none;
-		border: none;
+		background: #f0f0f0; /* Grigio chiaro per vederlo subito */
+		border: 1px solid #ccc;
+		border-radius: 4px;
 		cursor: pointer;
 		color: var(--black);
-		padding: 5px;
+		padding: 8px;
+		line-height: 0;
 	}
 
-	/* --- MOBILE LAYOUT --- */
+	/* --- MOBILE (Sotto i 720px) --- */
 	@media (max-width: 720px) {
-		.desktop-socials {
-			display: none; /* Nascondiamo i social dall'header su mobile */
+		.menu-button {
+			display: inline-flex !important; /* Forza la visibilità */
 		}
 
-		.menu-button {
-			display: block; /* Mostriamo l'hamburger */
+		.desktop-socials {
+			display: none !important;
 		}
 
 		.internal-links {
-			display: none; /* Nascondiamo il menù classico */
+			display: none; /* Nasconde i link orizzontali */
 			flex-direction: column;
 			position: absolute;
 			top: 70px;
 			left: 0;
 			width: 100%;
 			background: var(--background-body, white);
-			padding: 1em;
-			box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-			z-index: 10;
-			gap: 10px;
+			padding: 1.5em;
+			box-shadow: 0 10px 15px rgba(0,0,0,0.1);
+			gap: 1.5em;
+			text-align: center;
 		}
 
 		.internal-links.show {
-			display: flex; /* Mostriamo il menù al click */
+			display: flex !important; /* Si attiva col JavaScript */
 		}
 	}
 </style>
