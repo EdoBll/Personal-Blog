@@ -138,7 +138,6 @@ interface eth0
 nogateway
 ```
 These rules ensure that wlan1 always has the AP address before hostapd and isc‑dhcp‑server start. They also prevent dhcpcd from assigning a gateway on eth0, avoiding overwriting the default route when another interface (for example wlan0) must act as the Internet gateway. Together with the change in NetworkManager.conf (which declares wlan1 unmanaged), these settings prevent multiple agents (NetworkManager, dhcpcd, hostapd) from interfering with each other and causing duplicate IP assignments or unwanted leases.
-
 At this point, restart the hostapd daemon:
 ```bash
 sudo systemctl restart hostapd
