@@ -19,7 +19,7 @@ It is recommended to read the *first part* before continuing.
 <br />
 
 <h4>4. Creating a Wi‑Fi Access Point for MITM monitoring</h4>
-An additional USB Wi‑Fi interface must be connected to the Raspberry Pi to create an access point (AP).The resulting setup uses wlan0 as the client interface connected to the real Wi‑Fi router (providing Internet to the Raspberry Pi), while **wlan1** becomes the local Access Point serving wireless devices. As with the eth0 interface, wlan1 must use the Raspberry Pi’s internal DHCP service and forward/NAT traffic toward wlan0.
+An additional USB Wi‑Fi interface must be connected to the Raspberry Pi to create an access point(AP).The resulting setup uses wlan0 as the client interface connected to the real Wi‑Fi router (providing Internet to the Raspberry Pi), while **wlan1** becomes the local Access Point serving wireless devices. As with the eth0 interface, wlan1 must use the Raspberry Pi’s internal DHCP service and forward/NAT traffic toward wlan0.
 Before applying any new configuration, create backups of the network settings applied in previous steps and verify the available network interfaces:
 ```bash
 sudo cp /etc/dhcp/dhcpd.conf /root/dhcpd.conf.backup
@@ -27,6 +27,7 @@ sudo iptables-save > /root/iptables.backup
 ip addr show
 ip route show
 ```
+<p>
 **Enable NAT in UFW for wlan1 as well.**<br />
 IP forwarding has already been enabled previously, so those steps are not repeated here. The remaining task is to enable NAT in UFW. Edit **/ect/ufw/before.rules** and insert the NAT block before the *filter section. The NAT rules previously added for eth0 must be extended to include wlan1. For example:
 
@@ -44,7 +45,8 @@ IP forwarding has already been enabled previously, so those steps are not repeat
 COMMIT
 ```
 Persistent IPv4 forwarding must be enabled by adding or uncommenting the line ``#net.ipv4.ip_forward=1``.
-
+</p>
+<p>
 **Installing and configuring the Access Point daemon.**<br />
 To create an access point (AP), install hostapd (Host Access Point Daemon), a program that converts a standard Wi‑Fi network adapter into a wireless Access Point or an authentication server. It supports WPA2 and WPA3, AES encryption and RADIUS authentication for enterprise networks.
 ```bash
@@ -81,8 +83,8 @@ Now, point the **hostapd** daemon to the configuration file by updating **/etc/d
 ```bash
 sudo sed -i 's|#DAEMON_CONF=""|DAEMON_CONF="/etc/hostapd/hostapd.conf"|' /etc/default/hostapd
 ```
-<br />
-
+</p>
+<p>
 **Adding DHCP server settings.**<br />
 The DHCP server must be configured to manage the subnet assigned to interface wlan1 and to provide the related network parameters. Edit **/etc/dhcp/dhcp.conf** and add the following block:
 ```bash
@@ -98,7 +100,8 @@ To ensure that clients connecting to the Wi‑Fi network receive an IP address, 
 ```bash
 INTERFACESv4="eth0 wlan1"
 ```
-<br />
+</p>
+<p>
 **Assigning a static IP to wlan1, enabling the interface and AP.**<br />
 It's time to configure NetworkManager so that it does not fully manage wlan1, since hostapd and NetworkManager can conflict if both try to control the same interface. Marking wlan1 as unmanaged (with nmcli) prevents NetworkManager from overriding settings or accepting temporary DHCP leases:
 ```bash
@@ -175,5 +178,4 @@ sudo cat /var/lib/dhcp/dhcpd.leases
 ```
 These commands help identify whether the problem is caused by missing dependencies, interfaces that are not ready, configuration errors in the file, or permissions/locks on the lease file.
 </Note>
-
-<br />
+</p>
