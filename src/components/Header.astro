@@ -73,15 +73,18 @@ import SocialLinks from './SocialLinks.astro';
 
 	/* Gestione Mobile */
 	@media (max-width: 720px) {
-		.social-links {
-			display: none;
+    	/* Usiamo .social-wrapper perché è il contenitore che esiste in questo file */
+    	.social-wrapper {
+        	display: none; 
+    	}
+    
+    	nav {
+        	/* Passiamo a 2 colonne: Titolo e Link interni */
+        	grid-template-columns: 1fr auto;
+    	}
+    
+    	.internal-links {
+        	justify-self: end;
+    	}
 		}
-		nav {
-			/* Su schermi piccoli usiamo solo 2 colonne per dare più spazio ai link */
-			grid-template-columns: 1fr auto;
-		}
-		.internal-links {
-			justify-self: end;
-		}
-	}
 </style>
