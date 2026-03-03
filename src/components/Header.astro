@@ -60,7 +60,7 @@ import SocialLinks from './SocialLinks.astro';
 		box-shadow: 0 2px 8px rgba(var(--black), 5%);
 		position: sticky;
 		top: 0;
-		z-index: 100;
+		z-index: 1000; /* Valore molto alto per stare sopra a tutto */
 	}
 
 	nav {
@@ -70,73 +70,40 @@ import SocialLinks from './SocialLinks.astro';
 		height: 70px;
 	}
 
-	h2 {
-		margin: 0;
-		font-size: 1.1em;
-		white-space: nowrap;
-	}
-
-	h2 a {
-		text-decoration: none;
-		color: var(--black);
-	}
-
-	.internal-links {
-		display: flex;
-		gap: 20px;
-	}
-
 	.header-controls {
 		display: flex;
 		align-items: center;
 		gap: 12px;
+		position: relative;
+		z-index: 1010; /* Ancora più alto dell'header */
 	}
 
 	.menu-button {
-		display: none; /* Nascosto su desktop */
-		background: none;
-		border: 1px solid #ccc;
-		border-radius: 4px;
+		display: none;
+		background: rgba(var(--gray), 10%); /* Leggero sfondo per test */
+		border: 1px solid rgba(var(--gray), 20%);
+		border-radius: 6px;
 		cursor: pointer;
-		color: var(--black);
-		padding: 6px;
+		color: currentColor;
+		padding: 8px;
 		line-height: 0;
 	}
 
-	.desktop-socials {
-		display: flex;
-		align-items: center;
-	}
+	/* ... resto del tuo CSS per .internal-links ... */
 
-	/* --- MOBILE OPTIMIZATION --- */
 	@media (max-width: 720px) {
-		.desktop-socials {
-			display: none !important;
-		}
-
 		.menu-button {
-			display: flex !important;
+			display: flex !important; /* Forza la visibilità su mobile */
 		}
+        
+        /* Forza la sparizione dei link orizzontali */
+        .internal-links {
+            display: none !important;
+        }
 
-		/* Nascondiamo i link centrali e li trasformiamo in menu a tendina */
-		nav .internal-links {
-			display: none; 
-			flex-direction: column;
-			position: absolute;
-			top: 70px;
-			left: 0;
-			width: 100%;
-			background: var(--background-body, white);
-			padding: 1.5em;
-			box-shadow: 0 10px 15px rgba(0,0,0,0.1);
-			gap: 1.5em;
-			text-align: center;
-			border-top: 1px solid #eee;
-		}
-
-		/* Mostra il menu quando ha la classe .show */
-		nav .internal-links.show {
-			display: flex;
-		}
+        .internal-links.show {
+            display: flex !important;
+            /* ... il resto del tuo stile per il menu a tendina ... */
+        }
 	}
 </style>

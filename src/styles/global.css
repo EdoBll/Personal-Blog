@@ -35,16 +35,6 @@ html.dark body {
 	color: rgb(var(--black));
 }
 
-/* Modifica per l'header (se necessario) */
-html.dark header {
-    background: #0f172a;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
-}
-
-/* Fix per i link nell'header che avevi in nero nel file Header.astro */
-html.dark nav a {
-    color: rgb(var(--black));
-}
 /* =========================================
    Fine configurazione Dark Mode Globale
    ========================================= */
@@ -68,10 +58,7 @@ body {
 	margin: 0;
 	padding: 0;
 	text-align: left;
-	background: linear-gradient(var(--gray-gradient)) no-repeat;
-	background-size: 100% 600px;
-	word-wrap: break-word;
-	overflow-wrap: break-word;
+	background-color: var(--background-body, #fff); /* Usa la variabile */
 	color: rgb(var(--gray-dark));
 	font-size: 20px;
 	line-height: 1.7;
