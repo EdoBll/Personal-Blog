@@ -10,6 +10,7 @@ import HeaderLink from './HeaderLink.astro';
             <HeaderLink href={`${import.meta.env.BASE_URL}/`}>Home</HeaderLink>
             <HeaderLink href={`${import.meta.env.BASE_URL}/blog`}>Blog</HeaderLink>
             <HeaderLink href={`${import.meta.env.BASE_URL}/about`}>About</HeaderLink>
+			<HeaderLink href={`${import.meta.env.BASE_URL}/about`}>Contact</HeaderLink>
         </div>
 		<div class="social-links">
 			<a href="https://it.linkedin.com/in/ebelli89" target="_blank">
@@ -41,37 +42,61 @@ import HeaderLink from './HeaderLink.astro';
 		background: white;
 		box-shadow: 0 2px 8px rgba(var(--black), 5%);
 	}
+
+	/* Modificato con Grid a 3 colonne in modo da allineare il tutto*/
+	nav {
+		display: grid;
+		grid-template-columns: 1fr auto 1fr; /* Sinistra e destra sono uguali (1fr) */
+		align-items: center;
+		height: 100%;
+	}
+
 	h2 {
 		margin: 0;
 		font-size: 1em;
+		justify-self: start; /* Spinge il titolo a sinistra */
 	}
 
-	h2 a,
-	h2 a.active {
+	h2 a {
 		text-decoration: none;
+		color: var(--black);
 	}
-	nav {
+
+	.internal-links {
 		display: flex;
-		align-items: center;
-		justify-content: space-between;
+		gap: 10px; /* Spazio tra le 4 voci */
+		justify-self: center; /* Centra il gruppo delle 4 voci nella colonna centrale */
 	}
+
+	.social-links {
+		display: flex;
+		gap: 1em;
+		justify-self: end; /* Spinge le icone a destra */
+	}
+
+	/* Stile comune per i link */
 	nav a {
 		padding: 1em 0.5em;
 		color: var(--black);
 		border-bottom: 4px solid transparent;
 		text-decoration: none;
 	}
+
 	nav a.active {
-		text-decoration: none;
 		border-bottom-color: var(--accent);
 	}
-	.social-links,
-	.social-links a {
-		display: flex;
-	}
+
+	/* Gestione Mobile */
 	@media (max-width: 720px) {
 		.social-links {
 			display: none;
+		}
+		nav {
+			/* Su schermi piccoli usiamo solo 2 colonne per dare più spazio ai link */
+			grid-template-columns: 1fr auto;
+		}
+		.internal-links {
+			justify-self: end;
 		}
 	}
 </style>
