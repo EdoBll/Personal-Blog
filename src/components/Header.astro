@@ -21,24 +21,24 @@ import SocialLinks from './SocialLinks.astro';
 </header>
 <style>
 	header {
-    	margin: 0;
-    	padding: 0 1em;
-    	background: var(--background-body, white); /* Prova a leggere la variabile, altrimenti usa white */
-    	box-shadow: 0 2px 8px rgba(var(--black), 5%);
+		margin: 0;
+		padding: 0 1em;
+		background: var(--background-body, white);
+		box-shadow: 0 2px 8px rgba(var(--black), 5%);
 	}
 
-	/* Modificato con Grid a 3 colonne in modo da allineare il tutto*/
 	nav {
 		display: grid;
-		grid-template-columns: 1fr auto 1fr; /* Sinistra e destra sono uguali (1fr) */
+		grid-template-columns: auto 1fr auto; /* Titolo | Spazio/Link | Tema */
 		align-items: center;
 		height: 100%;
+		gap: 1em;
 	}
 
 	h2 {
 		margin: 0;
 		font-size: 1em;
-		justify-self: start; /* Spinge il titolo a sinistra */
+		white-space: nowrap; /* Impedisce al nome di andare a capo */
 	}
 
 	h2 a {
@@ -48,43 +48,53 @@ import SocialLinks from './SocialLinks.astro';
 
 	.internal-links {
 		display: flex;
-		gap: 10px; /* Spazio tra le 4 voci */
-		justify-self: center; /* Centra il gruppo delle 4 voci nella colonna centrale */
+		gap: 15px;
+		justify-self: center;
 	}
 
 	.social-wrapper {
 		display: flex;
 		align-items: center;
-		gap: 0.8em; /* Spazio tra l'icona del tema e le icone social */
+		gap: 0.8em;
 		justify-self: end;
 	}
 
-	/* Stile comune per i link */
 	nav a {
-		padding: 1em 0.5em;
+		padding: 1em 0.2em;
 		color: var(--black);
 		border-bottom: 4px solid transparent;
 		text-decoration: none;
+		font-size: 0.95em;
 	}
 
 	nav a.active {
 		border-bottom-color: var(--accent);
 	}
 
-	/* Gestione Mobile */
+	/* --- GESTIONE MOBILE --- */
 	@media (max-width: 720px) {
-    	/* Usiamo .social-wrapper perché è il contenitore che esiste in questo file */
-    	.social-wrapper {
-        	display: none; 
-    	}
-    
-    	nav {
-        	/* Passiamo a 2 colonne: Titolo e Link interni */
-        	grid-template-columns: 1fr auto;
-    	}
-    
-    	.internal-links {
-        	justify-self: end;
-    	}
+		/* Usiamo :global per nascondere il componente SocialLinks dall'header */
+		.social-wrapper :global(.social-links) {
+			display: none;
 		}
+
+		nav {
+			/* Compattiamo la griglia per far stare tutto su una riga */
+			grid-template-columns: auto 1fr auto;
+			gap: 0.5em;
+		}
+
+		h2 {
+			font-size: 0.9em;
+		}
+
+		.internal-links {
+			gap: 8px; /* Stringiamo lo spazio tra Home, Blog e About */
+		}
+
+		nav a {
+			padding: 0.8em 0.2em;
+			font-size: 0.85em; /* Font leggermente più piccolo per mobile */
+		}
+	}
 </style>
