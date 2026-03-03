@@ -5,6 +5,7 @@
  */
 
 :root {
+	--background-body: #ffffff; /* Sfondo chiaro */
 	--accent: #2337ff;
 	--accent-dark: #000d8a;
 	--black: 15, 18, 25;
@@ -21,6 +22,7 @@
    Configurazione Dark Mode Globale
    ========================================= */
 html.dark {
+	--background-body: #0f172a; /* Sfondo scuro */
 	--black: 243, 244, 247;    /* Testo quasi bianco */
 	--gray: 152, 162, 179;
 	--gray-light: 34, 41, 57;  /* Background di code e bordi scuro */
