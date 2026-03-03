@@ -19,7 +19,7 @@ import ThemeIcon from './ThemeIcon.astro';
 		<div class="header-controls">
 			<ThemeIcon />
 			<button id="menu-toggle" aria-label="Menu" class="menu-button">
-				<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+				<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
 					<line x1="3" y1="12" x2="21" y2="12"></line>
 					<line x1="3" y1="6" x2="21" y2="6"></line>
 					<line x1="3" y1="18" x2="21" y2="18"></line>
@@ -30,14 +30,16 @@ import ThemeIcon from './ThemeIcon.astro';
 </header>
 
 <script>
-	function initMenu() {
+	const initMenu = () => {
 		const btn = document.getElementById('menu-toggle');
 		const menu = document.getElementById('nav-menu');
 		if (btn && menu) {
-			btn.onclick = () => menu.classList.toggle('show');
+			// Usiamo addEventListener invece di onclick per maggiore robustezza
+			btn.addEventListener('click', () => {
+				menu.classList.toggle('show');
+			});
 		}
-	}
-	// Inizializza al caricamento e dopo ogni cambio pagina
+	};
 	initMenu();
 	document.addEventListener('astro:after-swap', initMenu);
 </script>
@@ -52,6 +54,7 @@ import ThemeIcon from './ThemeIcon.astro';
 		top: 0;
 		z-index: 1000;
 		width: 100%;
+		color: rgb(var(--black)); /* Assicura che icone e testi abbiano un colore base */
 	}
 
 	nav {
@@ -63,24 +66,25 @@ import ThemeIcon from './ThemeIcon.astro';
 		margin: 0 auto;
 	}
 
-	h2 { margin: 0; font-size: 1.1em; white-space: nowrap; }
+	h2 { margin: 0; font-size: 1.1em; }
 	h2 a { text-decoration: none; color: inherit; }
 
 	.header-controls {
 		display: flex;
 		align-items: center;
-		gap: 15px;
+		gap: 12px;
 	}
 
 	.menu-button {
 		display: none;
-		background: none;
-		border: 1.5px solid currentColor;
+		background: rgba(var(--gray), 0.1);
+		border: 1px solid rgba(var(--gray), 0.2);
 		border-radius: 6px;
-		padding: 5px;
+		padding: 6px;
 		cursor: pointer;
 		color: inherit;
 		line-height: 0;
+		flex-shrink: 0; /* Impedisce al bottone di rimpicciolirsi */
 	}
 
 	.internal-links {
@@ -89,7 +93,9 @@ import ThemeIcon from './ThemeIcon.astro';
 	}
 
 	@media (max-width: 720px) {
-		.menu-button { display: block !important; }
+		.menu-button { 
+			display: flex !important; /* Forza la visibilità */
+		}
 
 		.internal-links {
 			display: none; 
@@ -99,12 +105,15 @@ import ThemeIcon from './ThemeIcon.astro';
 			left: 0;
 			width: 100%;
 			background-color: var(--background-body);
-			padding: 2em 1em;
+			padding: 1.5rem;
 			box-shadow: 0 10px 15px rgba(0,0,0,0.1);
 			z-index: 999;
-			gap: 1.5em;
+			gap: 1.2rem;
+			border-top: 1px solid rgba(var(--gray), 0.1);
 		}
 
-		.internal-links.show { display: flex !important; }
+		.internal-links.show { 
+			display: flex !important; 
+		}
 	}
 </style>
