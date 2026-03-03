@@ -1,44 +1,64 @@
 ---
 import { SITE_TITLE } from '../consts';
 import HeaderLink from './HeaderLink.astro';
-import ThemeIcon from './ThemeIcon.astro'; //Button per cambio tema (scuro-chiaro) //
+import ThemeIcon from './ThemeIcon.astro';
 import SocialLinks from './SocialLinks.astro';
 ---
 
 <header>
 	<nav>
 		<h2><a href={import.meta.env.BASE_URL}>{SITE_TITLE}</a></h2>
-		<div class="internal-links">
+		
+		<div class="internal-links" id="nav-menu">
 			<HeaderLink href={`${import.meta.env.BASE_URL}/`}>Home</HeaderLink>
 			<HeaderLink href={`${import.meta.env.BASE_URL}/blog`}>Blog</HeaderLink>
 			<HeaderLink href={`${import.meta.env.BASE_URL}/about`}>About</HeaderLink>
 		</div>
-		<div class="social-wrapper">
+
+		<div class="header-controls">
 			<ThemeIcon />
-			<SocialLinks />
+			<button id="menu-toggle" aria-label="Menu" class="menu-button">
+				<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+					<line x1="3" y1="12" x2="21" y2="12"></line>
+					<line x1="3" y1="6" x2="21" y2="6"></line>
+					<line x1="3" y1="18" x2="21" y2="18"></line>
+				</svg>
+			</button>
+			<div class="desktop-socials">
+				<SocialLinks />
+			</div>
 		</div>
 	</nav>
 </header>
+
+<script>
+	const btn = document.getElementById('menu-toggle');
+	const menu = document.getElementById('nav-menu');
+
+	btn?.addEventListener('click', () => {
+		menu?.classList.toggle('show');
+	});
+</script>
+
 <style>
 	header {
 		margin: 0;
 		padding: 0 1em;
 		background: var(--background-body, white);
 		box-shadow: 0 2px 8px rgba(var(--black), 5%);
+		position: relative;
 	}
 
 	nav {
-		display: grid;
-		grid-template-columns: auto 1fr auto; /* Titolo | Spazio/Link | Tema */
+		display: flex;
 		align-items: center;
-		height: 100%;
-		gap: 1em;
+		justify-content: space-between;
+		height: 70px;
 	}
 
 	h2 {
 		margin: 0;
-		font-size: 1em;
-		white-space: nowrap; /* Impedisce al nome di andare a capo */
+		font-size: 1.1em;
 	}
 
 	h2 a {
@@ -48,53 +68,50 @@ import SocialLinks from './SocialLinks.astro';
 
 	.internal-links {
 		display: flex;
-		gap: 15px;
-		justify-self: center;
+		gap: 20px;
 	}
 
-	.social-wrapper {
+	.header-controls {
 		display: flex;
 		align-items: center;
-		gap: 0.8em;
-		justify-self: end;
+		gap: 1em;
 	}
 
-	nav a {
-		padding: 1em 0.2em;
+	.menu-button {
+		display: none; /* Nascosto su desktop */
+		background: none;
+		border: none;
+		cursor: pointer;
 		color: var(--black);
-		border-bottom: 4px solid transparent;
-		text-decoration: none;
-		font-size: 0.95em;
+		padding: 5px;
 	}
 
-	nav a.active {
-		border-bottom-color: var(--accent);
-	}
-
-	/* --- GESTIONE MOBILE --- */
+	/* --- MOBILE LAYOUT --- */
 	@media (max-width: 720px) {
-		/* Usiamo :global per nascondere il componente SocialLinks dall'header */
-		.social-wrapper :global(.social-links) {
-			display: none;
+		.desktop-socials {
+			display: none; /* Nascondiamo i social dall'header su mobile */
 		}
 
-		nav {
-			/* Compattiamo la griglia per far stare tutto su una riga */
-			grid-template-columns: auto 1fr auto;
-			gap: 0.5em;
-		}
-
-		h2 {
-			font-size: 0.9em;
+		.menu-button {
+			display: block; /* Mostriamo l'hamburger */
 		}
 
 		.internal-links {
-			gap: 8px; /* Stringiamo lo spazio tra Home, Blog e About */
+			display: none; /* Nascondiamo il menù classico */
+			flex-direction: column;
+			position: absolute;
+			top: 70px;
+			left: 0;
+			width: 100%;
+			background: var(--background-body, white);
+			padding: 1em;
+			box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+			z-index: 10;
+			gap: 10px;
 		}
 
-		nav a {
-			padding: 0.8em 0.2em;
-			font-size: 0.85em; /* Font leggermente più piccolo per mobile */
+		.internal-links.show {
+			display: flex; /* Mostriamo il menù al click */
 		}
 	}
 </style>
