@@ -29,7 +29,7 @@
 		display: flex;
 		align-items: center;
 		justify-content: center;
-		width: 34px; /* Riquadro esterno identico per entrambi */
+		width: 34px; /* Riquadro esterno */
 		height: 34px;
 		border-radius: 4px;
 		transition: transform 0.2s ease;
@@ -39,17 +39,26 @@
 		transform: scale(1.1);
 	}
 
-	/* Sfondi ufficiali dei riquadri */
 	.linkedin-link { background-color: #0077b5; }
 	.github-link { background-color: #24292f; }
 
+	/* Stile base per entrambi */
 	.branded-svg {
-		width: 20px; /* Dimensione interna identica */
-		height: 20px;
-		fill: #ffffff; /* Entrambi i loghi interni ora sono forzatamente bianchi */
+		fill: #ffffff;
 	}
 
-	/* Supporto Dark Mode */
+	/* Dimensione specifica per LinkedIn (lasciamo quella attuale) */
+	.linkedin-link .branded-svg {
+		width: 20px;
+		height: 20px;
+	}
+
+	/* Dimensione specifica per GitHub (la ingrandiamo un po') */
+	.github-link .branded-svg {
+		width: 24px; 
+		height: 24px;
+	}
+
 	:global(.dark) .github-link {
 		background-color: #333;
 		border: 1px solid #444;
