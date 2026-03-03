@@ -16,6 +16,7 @@ It is recommended to read the *first part* before continuing.
 <Image src={mitmDiagram} alt="MITM diagram not complete" />
 
 <br />
+<br />
 
 <h4>4. Creating a Wi‑Fi Access Point for MITM monitoring</h4>
 An additional USB Wi‑Fi interface must be connected to the Raspberry Pi to create an access point (AP).The resulting setup uses wlan0 as the client interface connected to the real Wi‑Fi router (providing Internet to the Raspberry Pi), while **wlan1** becomes the local Access Point serving wireless devices. As with the eth0 interface, wlan1 must use the Raspberry Pi’s internal DHCP service and forward/NAT traffic toward wlan0.
@@ -27,7 +28,7 @@ sudo iptables-save > /root/iptables.backup
 ip addr show
 ip route show
 ```
-**Enable NAT in UFW for wlan1 as well**
+**Enable NAT in UFW for wlan1 as well.**<br />
 IP forwarding has already been enabled previously, so those steps are not repeated here. The remaining task is to enable NAT in UFW. Edit **/ect/ufw/before.rules** and insert the NAT block before the *filter section. The NAT rules previously added for eth0 must be extended to include wlan1. For example:
 
 ```bash
@@ -45,7 +46,7 @@ COMMIT
 ```
 Persistent IPv4 forwarding must be enabled by adding or uncommenting the line ``#net.ipv4.ip_forward=1``.
 
-**Installing and configuring the Access Point daemon**
+**Installing and configuring the Access Point daemon.**<br />
 To create an access point (AP), install hostapd (Host Access Point Daemon), a program that converts a standard Wi‑Fi network adapter into a wireless Access Point or an authentication server. It supports WPA2 and WPA3, AES encryption and RADIUS authentication for enterprise networks.
 
 ```bash
@@ -72,7 +73,6 @@ rsn_pairwise=CCMP
 country_code=IT
 ```
 This configuration defines a Wi‑Fi network on **wlan1**  with SSID **IoT_Monitor_AP**, operating under IEEE 802.11g at 2.4 GHz on channel 6 (2437 MHz) to avoid the commonly used channels 1 and 11. Security is provided by WPA2 (IEEE 802.11i) with AES encryption; authentication is handled via a pre‑shared key (PSK) rather than an external server. Setting the country code ensures compliance with local frequency regulations and improves signal stability.
-
 It is advisable to start from this basic configuration. Additional option can be added later, for example:
 
 ``ieee80211n=1`` -> enable 802.11n support for improved performance on modern devices.
@@ -84,7 +84,8 @@ Now, point the **hostapd** daemon to the configuration file by updating **/etc/d
 sudo sed -i 's|#DAEMON_CONF=""|DAEMON_CONF="/etc/hostapd/hostapd.conf"|' /etc/default/hostapd
 ```
 <br />
-**Adding DHCP server settings**
+
+**Adding DHCP server settings.**<br />
 The DHCP server must be configured to manage the subnet assigned to interface wlan1 and to provide the related network parameters. Edit **/etc/dhcp/dhcp.conf** and add the following block:
 ```bash
 # Subnet served by wlan1 – Raspberry
@@ -100,7 +101,7 @@ To ensure that clients connecting to the Wi‑Fi network receive an IP address, 
 INTERFACESv4="eth0 wlan1"
 ```
 <br />
-**Assigning a static IP to wlan1, enabling the interface and AP**
+**Assigning a static IP to wlan1, enabling the interface and AP.**<br />
 It's time to configure NetworkManager so that it does not fully manage wlan1, since hostapd and NetworkManager can conflict if both try to control the same interface. Marking wlan1 as unmanaged (with nmcli) prevents NetworkManager from overriding settings or accepting temporary DHCP leases:
 ```bash
 sudo nmcli device set wlan1 managed no
@@ -136,7 +137,7 @@ interface eth0
 nogateway
 ```
 These rules ensure that wlan1 always has the AP address before hostapd and isc‑dhcp‑server start. They also prevent dhcpcd from assigning a gateway on eth0, avoiding overwriting the default route when another interface (for example wlan0) must act as the Internet gateway. Together with the change in NetworkManager.conf (which declares wlan1 unmanaged), these settings prevent multiple agents (NetworkManager, dhcpcd, hostapd) from interfering with each other and causing duplicate IP assignments or unwanted leases.
-<br />
+
 At this point, restart the hostapd daemon:
 ```bash
 sudo systemctl restart hostapd
