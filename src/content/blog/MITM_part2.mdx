@@ -21,7 +21,6 @@ It is recommended to read the *first part* before continuing.
 <h4>4. Creating a Wi‑Fi Access Point for MITM monitoring</h4>
 An additional USB Wi‑Fi interface must be connected to the Raspberry Pi to create an access point (AP).The resulting setup uses wlan0 as the client interface connected to the real Wi‑Fi router (providing Internet to the Raspberry Pi), while **wlan1** becomes the local Access Point serving wireless devices. As with the eth0 interface, wlan1 must use the Raspberry Pi’s internal DHCP service and forward/NAT traffic toward wlan0.
 Before applying any new configuration, create backups of the network settings applied in previous steps and verify the available network interfaces:
-
 ```bash
 sudo cp /etc/dhcp/dhcpd.conf /root/dhcpd.conf.backup
 sudo iptables-save > /root/iptables.backup
@@ -48,7 +47,6 @@ Persistent IPv4 forwarding must be enabled by adding or uncommenting the line ``
 
 **Installing and configuring the Access Point daemon.**<br />
 To create an access point (AP), install hostapd (Host Access Point Daemon), a program that converts a standard Wi‑Fi network adapter into a wireless Access Point or an authentication server. It supports WPA2 and WPA3, AES encryption and RADIUS authentication for enterprise networks.
-
 ```bash
 sudo apt install hostapd
 ```
