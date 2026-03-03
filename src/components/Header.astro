@@ -7,7 +7,9 @@ import SocialLinks from './SocialLinks.astro';
 
 <header>
 	<nav>
-		<h2><a href={import.meta.env.BASE_URL}>{SITE_TITLE}</a></h2>
+		<div class="nav-left">
+			<h2><a href={import.meta.env.BASE_URL}>{SITE_TITLE}</a></h2>
+		</div>
 		
 		<div class="internal-links" id="nav-menu">
 			<HeaderLink href={`${import.meta.env.BASE_URL}/`}>Home</HeaderLink>
@@ -32,12 +34,22 @@ import SocialLinks from './SocialLinks.astro';
 </header>
 
 <script>
-	const btn = document.getElementById('menu-toggle');
-	const menu = document.getElementById('nav-menu');
+	// Funzione per gestire il menu, compatibile con Astro View Transitions
+	function initMenu() {
+		const btn = document.getElementById('menu-toggle');
+		const menu = document.getElementById('nav-menu');
 
-	btn?.addEventListener('click', () => {
-		menu?.classList.toggle('show');
-	});
+		if (btn && menu) {
+			// Rimuoviamo eventuali listener precedenti per evitare duplicati
+			btn.onclick = () => {
+				menu.classList.toggle('show');
+			};
+		}
+	}
+
+	// Inizializzazione
+	initMenu();
+	document.addEventListener('astro:after-swap', initMenu);
 </script>
 
 <style>
@@ -46,8 +58,9 @@ import SocialLinks from './SocialLinks.astro';
 		padding: 0 1em;
 		background: var(--background-body, white);
 		box-shadow: 0 2px 8px rgba(var(--black), 5%);
-		position: relative;
-		z-index: 20;
+		position: sticky;
+		top: 0;
+		z-index: 100;
 	}
 
 	nav {
@@ -60,45 +73,54 @@ import SocialLinks from './SocialLinks.astro';
 	h2 {
 		margin: 0;
 		font-size: 1.1em;
-		z-index: 30;
+		white-space: nowrap;
+	}
+
+	h2 a {
+		text-decoration: none;
+		color: var(--black);
 	}
 
 	.internal-links {
 		display: flex;
 		gap: 20px;
-		transition: all 0.3s ease;
 	}
 
 	.header-controls {
 		display: flex;
 		align-items: center;
-		gap: 12px; /* Spazio tra tema e hamburger */
-		z-index: 30;
+		gap: 12px;
 	}
 
 	.menu-button {
 		display: none; /* Nascosto su desktop */
-		background: #f0f0f0; /* Grigio chiaro per vederlo subito */
+		background: none;
 		border: 1px solid #ccc;
 		border-radius: 4px;
 		cursor: pointer;
 		color: var(--black);
-		padding: 8px;
+		padding: 6px;
 		line-height: 0;
 	}
 
-	/* --- MOBILE (Sotto i 720px) --- */
-	@media (max-width: 720px) {
-		.menu-button {
-			display: inline-flex !important; /* Forza la visibilità */
-		}
+	.desktop-socials {
+		display: flex;
+		align-items: center;
+	}
 
+	/* --- MOBILE OPTIMIZATION --- */
+	@media (max-width: 720px) {
 		.desktop-socials {
 			display: none !important;
 		}
 
-		.internal-links {
-			display: none; /* Nasconde i link orizzontali */
+		.menu-button {
+			display: flex !important;
+		}
+
+		/* Nascondiamo i link centrali e li trasformiamo in menu a tendina */
+		nav .internal-links {
+			display: none; 
 			flex-direction: column;
 			position: absolute;
 			top: 70px;
@@ -109,10 +131,12 @@ import SocialLinks from './SocialLinks.astro';
 			box-shadow: 0 10px 15px rgba(0,0,0,0.1);
 			gap: 1.5em;
 			text-align: center;
+			border-top: 1px solid #eee;
 		}
 
-		.internal-links.show {
-			display: flex !important; /* Si attiva col JavaScript */
+		/* Mostra il menu quando ha la classe .show */
+		nav .internal-links.show {
+			display: flex;
 		}
 	}
 </style>
