@@ -7,7 +7,6 @@ import FormattedDate from '../components/FormattedDate.astro';
 import Header from '../components/Header.astro';
 
 type Props = CollectionEntry<'blog'>['data'];
-
 const { title, description, pubDate, updatedDate, heroImage } = Astro.props;
 ---
 
@@ -15,72 +14,24 @@ const { title, description, pubDate, updatedDate, heroImage } = Astro.props;
 	<head>
 		<BaseHead title={title} description={description} />
 		<script is:inline>
-  		const theme = (() => {
-    		if (typeof localStorage !== 'undefined' && localStorage.getItem('theme')) {
-      		return localStorage.getItem('theme');
-    		}
-    		if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
-      		return 'dark';
-    		}
-    		return 'light';
-  		})();
-
-  		if (theme === 'light') {
-    		document.documentElement.classList.remove('dark');
-  		} else {
-    		document.documentElement.classList.add('dark');
-  		}
-  			window.localStorage.setItem('theme', theme);
+			const theme = (() => {
+				if (typeof localStorage !== 'undefined' && localStorage.getItem('theme')) {
+					return localStorage.getItem('theme');
+				}
+				if (window.matchMedia('(prefers-color-scheme: dark)').matches) return 'dark';
+				return 'light';
+			})();
+			if (theme === 'light') document.documentElement.classList.remove('dark');
+			else document.documentElement.classList.add('dark');
+			window.localStorage.setItem('theme', theme);
 		</script>
 		<style>
-			/* <style> qui in basso è stato modificato da Edoardo Belli */
-			
-			.hero-image {
-				width: 100%;
-				margin-bottom: 2em;
-			}
-			.hero-image img {
-				display: block;
-				margin: 0 auto;
-				border-radius: 12px;
-				box-shadow: var(--box-shadow);
-				width: 100%;
-				height: auto;
-			}
-			.prose {
-				width: 100% !important;
-				max-width: 960px !important;
-				margin: 0 auto !important;
-				padding: 0;
-				color: rgb(var(--gray-dark));
-			}
-			.title {
-				width: 100% !important;
-				margin: 0 auto 2rem auto !important;
-				padding: 2rem 0 !important;
-				display: flex;             /* Forza la centratura come contenitore */
-				flex-direction: column;
-				align-items: center;       /* Centra orizzontalmente h1 e data */
-				text-align: center !important;
-			}
-			.title h1 {
-				width: 100% !important;
-				margin: 0 auto 0.5em auto !important;
-				text-align: center !important;
-				text-align-last: center !important; /* Fix per sovrascrivere il global.css */
-				display: block !important;
-
-				text-wrap: balance; /* Bilancia le righe del titolo*/
-			}
-			
-			.date {
-				width: 100% !important;
-				margin-bottom: 1rem;
-				color: rgb(var(--gray));
-				text-align: center !important;
-				text-align-last: center !important; /* Fix per sovrascrivere il global.css */
-				display: block !important;
-			}
+			.hero-image { width: 100%; margin-bottom: 2em; }
+			.hero-image img { display: block; margin: 0 auto; border-radius: 12px; box-shadow: var(--box-shadow); width: 100%; height: auto; }
+			.prose { width: 100%; max-width: 960px; margin: 0 auto; color: rgb(var(--gray-dark)); }
+			.title { text-align: center; padding: 2rem 0; }
+			.title h1 { margin-bottom: 0.5em; text-wrap: balance; }
+			.date { color: rgb(var(--gray)); margin-bottom: 1rem; }
 		</style>
 	</head>
 
@@ -95,13 +46,7 @@ const { title, description, pubDate, updatedDate, heroImage } = Astro.props;
 					<div class="title">
 						<div class="date">
 							<FormattedDate date={pubDate} />
-							{
-								updatedDate && (
-									<div class="last-updated-on">
-										Last updated on <FormattedDate date={updatedDate} />
-									</div>
-								)
-							}
+							{updatedDate && <div class="last-updated-on">Last updated on <FormattedDate date={updatedDate} /></div>}
 						</div>
 						<h1>{title}</h1>
 						<hr />

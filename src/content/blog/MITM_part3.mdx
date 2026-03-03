@@ -1,0 +1,26 @@
+---
+title: 'Integrating Burp Suite for Advanced MITM Monitoring on Raspberry Pi (Part 3)'
+description: ''
+pubDate: 'March 6 2026'
+heroImage: '../../assets/MITM copertina2.png'
+---
+import { Image } from 'astro:assets';
+import mitmDiagram from '../../assets/MITM_final.png';
+import Note from '../../components/Note.astro';
+
+<p>
+In the first two parts of the series, a Raspberry Pi was configured as a robust network monitoring station.<br />
+<a href="https://edobll.github.io/Personal-Blog/blog/mitm_part1/"> `Part 1`</a>, established routing and monitoring on the Ethernet interface. 
+<a href="https://edobll.github.io/Personal-Blog/blog/mitm_part2/"> `Part 2`</a>, introduced a dedicated Wi‑Fi Access Point, enabling IoT devices to connect and be monitored without cables.<br />
+However, observing raw packet flows with `tcpdump` or `Wireshark` encounters a fundamental limitation: encryption. In contemporary networks, the majority of traffic is carried over HTTPS, which obscures application‑layer behavior and hinders interpretation of device activity.<br />
+To enable interception and interaction with HTTP/S requests, two proxy approaches are available: an `explicit proxy` and a `transparent proxy`. The explicit proxy is the simpler and more robust option, as it avoids routing complications and preserves TLS handling. However, it requires clients to be proxy‑aware, a condition commonly met by PCs and smartphones but often absent in many IoT devices. For non‑proxy‑aware clients, a transparent proxy can be employed to redirect HTTP traffic to the proxy without any client‑side configuration.<br />
+In this article, for broader coverage and compatibility with diverse target devices, a transparent proxy will be implemented on the same network as wlan0. This configuration intercepts all HTTP traffic (port 80) associated with the wlan1 and eth0 interfaces and forwards it to **Burp Suite** for inspection and manipulation. Decrypting HTTPS traffic requires an additional step: generating `Burp’s Certificate Authority (CA)` and installing it on the test clients, since clients will otherwise reject the MITM connection as untrusted.<br />
+These configurations transform passive observation into a practical framework for comprehensive security assessment.
+</p>
+
+<Image src={mitmDiagram} alt="MITM_final" />
+
+<br />
+<br />
+
+<h4>1. Burp Suite configuration on the host machine</h4>

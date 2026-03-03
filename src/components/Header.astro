@@ -2,14 +2,51 @@
 import { SITE_TITLE } from '../consts';
 import HeaderLink from './HeaderLink.astro';
 import ThemeIcon from './ThemeIcon.astro';
-import SocialLinks from './SocialLinks.astro';
 ---
+
+<header>
+	<nav>
+		<div class="nav-left">
+			<h2><a href={import.meta.env.BASE_URL}>{SITE_TITLE}</a></h2>
+		</div>
+		
+		<div class="internal-links" id="nav-menu">
+			<HeaderLink href={`${import.meta.env.BASE_URL}/`}>Home</HeaderLink>
+			<HeaderLink href={`${import.meta.env.BASE_URL}/blog`}>Blog</HeaderLink>
+			<HeaderLink href={`${import.meta.env.BASE_URL}/about`}>About</HeaderLink>
+		</div>
+
+		<div class="header-controls">
+			<ThemeIcon />
+			<button id="menu-toggle" aria-label="Menu" class="menu-button">
+				<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+					<line x1="3" y1="12" x2="21" y2="12"></line>
+					<line x1="3" y1="6" x2="21" y2="6"></line>
+					<line x1="3" y1="18" x2="21" y2="18"></line>
+				</svg>
+			</button>
+		</div>
+	</nav>
+</header>
+
+<script>
+	function initMenu() {
+		const btn = document.getElementById('menu-toggle');
+		const menu = document.getElementById('nav-menu');
+		if (btn && menu) {
+			btn.onclick = () => menu.classList.toggle('show');
+		}
+	}
+	// Inizializza al caricamento e dopo ogni cambio pagina
+	initMenu();
+	document.addEventListener('astro:after-swap', initMenu);
+</script>
 
 <style>
 	header {
 		margin: 0;
 		padding: 0 1em;
-		background-color: var(--background-body); /* Ora la variabile esiste! */
+		background-color: var(--background-body);
 		box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 		position: sticky;
 		top: 0;
@@ -26,6 +63,9 @@ import SocialLinks from './SocialLinks.astro';
 		margin: 0 auto;
 	}
 
+	h2 { margin: 0; font-size: 1.1em; white-space: nowrap; }
+	h2 a { text-decoration: none; color: inherit; }
+
 	.header-controls {
 		display: flex;
 		align-items: center;
@@ -35,7 +75,7 @@ import SocialLinks from './SocialLinks.astro';
 	.menu-button {
 		display: none;
 		background: none;
-		border: 1.5px solid currentColor; /* Usa il colore del testo corrente */
+		border: 1.5px solid currentColor;
 		border-radius: 6px;
 		padding: 5px;
 		cursor: pointer;
@@ -49,29 +89,22 @@ import SocialLinks from './SocialLinks.astro';
 	}
 
 	@media (max-width: 720px) {
-		.menu-button {
-			display: block !important; /* Forza apparizione */
-		}
-
-		.desktop-socials {
-			display: none !important;
-		}
+		.menu-button { display: block !important; }
 
 		.internal-links {
 			display: none; 
 			flex-direction: column;
 			position: absolute;
-			top: 100%; /* Sotto l'header */
+			top: 70px;
 			left: 0;
 			width: 100%;
 			background-color: var(--background-body);
 			padding: 2em 1em;
 			box-shadow: 0 10px 15px rgba(0,0,0,0.1);
 			z-index: 999;
+			gap: 1.5em;
 		}
 
-		.internal-links.show {
-			display: flex !important;
-		}
+		.internal-links.show { display: flex !important; }
 	}
 </style>
