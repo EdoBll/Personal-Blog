@@ -61,15 +61,14 @@ body {
 	color: rgb(var(--gray-dark));
 	font-size: 20px;
 	line-height: 1.7;
-	-webkit-font-smoothing: antialiased; /* Migliora resa font su mobile */
+	overflow-x: hidden; /* Evita fastidiosi movimenti laterali su mobile */
 }
 
 main {
-  	width: 100%;
-  	max-width: 960px !important;
-  	margin: 0 auto !important;
-  	padding: 2em 1em;
-  	box-sizing: border-box;
+	width: 100%;
+	max-width: 960px !important;
+	margin: 0 auto !important;
+	padding: 2em 1em;
 }
 
 /* Stile per i link nell'header per evitare conflitti */
