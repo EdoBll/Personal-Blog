@@ -98,7 +98,6 @@ sudo ufw status verbose
 
 <br />
 
-<p>
 <h4>3. Intercepting and Decrypting HTTPS Traffic</h4>
 Intercepting HTTPS traffic (port 443) is significantly more complex than standard HTTP due to the implementation of TLS/SSL encryption. If Burp Suite merely captures the packets, it will only see encrypted data. To analyze this traffic, the end-to-end chain of trust must be broken by positioning Burp Suite as an intermediate interpreter. This is achieved through a dual handshake process:
 
