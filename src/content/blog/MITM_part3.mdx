@@ -6,7 +6,7 @@ heroImage: '../../assets/MITM_3.jpg'
 ---
 import { Image } from 'astro:assets';
 import mitmDiagram from '../../assets/MITM_final.png';
-import burpca from '../../assets/BurpCA,jpg';
+import burpca from '../../assets/BurpCA.jpg';
 import Note from '../../components/Note.astro';
 
 <p>
@@ -94,12 +94,16 @@ sudo ufw enable
 sudo ufw status verbose
 ```
 </p>
+<br />
 
 <p>
 <h4>3. Intercepting and Decrypting HTTPS Traffic</h4>
 Intercepting HTTPS traffic (port 443) is significantly more complex than standard HTTP due to the implementation of TLS/SSL encryption. If Burp Suite merely captures the packets, it will only see encrypted data. To analyze this traffic, the end-to-end chain of trust must be broken by positioning Burp Suite as an intermediate interpreter. This is achieved through a dual handshake process:<br />
+<br />
 <li> **Client Side (Raspberry Pi ↔ Burp Suite)**: Burp intercepts the request and masquerades as the destination server, generating a spoofed certificate (for example, for google.com) to present to the Raspberry Pi. Normally, the Raspberry Pi’s operating system would reject this certificate as invalid. To resolve this, the Burp CA certificate must be exported and installed into the Raspberry Pi’s Trusted Root store. Once installed, the system will trust and accept any certificate signed by Burp.</li>
+<br />
 <li> **Server Side (Burp Suite ↔ Web Server)**: simultaneously, Burp establishes a separate, independent connection to the actual web server, acting as the client itself.</li>
+<br />
 To enable this decryption and interception, several configurations must be performed.
 <br />
 
