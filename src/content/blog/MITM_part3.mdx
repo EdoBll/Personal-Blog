@@ -23,6 +23,7 @@ Mastering these configurations elevates passive monitoring into a capable platfo
 
 <br />
 <br />
+<br />
 <p>
 <h4>1. Burp Suite configuration on the host machine</h4>
 The host running Burp must be reachable from the Raspberry Pi via wlan0: in other words, the proxy and the Raspberry’s wlan0 interface must reside on the same subnet. In this example, the Burp host uses IP 192.168.2.62 while the Raspberry’s wlan0 (the interface handling Internet access) is 192.168.2.108.<br />
@@ -43,6 +44,7 @@ curl -x http://192.168.2.62:8080 -k https://google.it
 If the request appears in Burp, TCP connectivity to the proxy is functioning even if ICMP ping fails.<br />
 Decrypting HTTPS requires generating **Burp’s Certificate Authority (CA)** and installing it on the test clients: without the CA, clients will reject the MITM connection as untrusted.
 </p>
+<br />
 
 <p>
 <h4>2. Routing rules for the Raspberry</h4>
@@ -98,7 +100,7 @@ sudo ufw status verbose
 
 <p>
 <h4>3. Intercepting and Decrypting HTTPS Traffic</h4>
-Intercepting HTTPS traffic (port 443) is significantly more complex than standard HTTP due to the implementation of TLS/SSL encryption. If Burp Suite merely captures the packets, it will only see encrypted data. To analyze this traffic, the end-to-end chain of trust must be broken by positioning Burp Suite as an intermediate interpreter. This is achieved through a dual handshake process:<br />
+Intercepting HTTPS traffic (port 443) is significantly more complex than standard HTTP due to the implementation of TLS/SSL encryption. If Burp Suite merely captures the packets, it will only see encrypted data. To analyze this traffic, the end-to-end chain of trust must be broken by positioning Burp Suite as an intermediate interpreter. This is achieved through a dual handshake process:
 <br />
 <li> **Client Side (Raspberry Pi ↔ Burp Suite)**: Burp intercepts the request and masquerades as the destination server, generating a spoofed certificate (for example, for google.com) to present to the Raspberry Pi. Normally, the Raspberry Pi’s operating system would reject this certificate as invalid. To resolve this, the Burp CA certificate must be exported and installed into the Raspberry Pi’s Trusted Root store. Once installed, the system will trust and accept any certificate signed by Burp.</li>
 <br />
@@ -132,6 +134,7 @@ The first step involves obtaining the CA certificate from the host machine where
 <i>Burp Suite -> Proxy -> Proxy Settings -> Proxy listeners -> Import / export CA certificate -> Certificate in DER format</i>
 <Image src={burpca} alt="BURPCA" />
 <br />
+<br />
 
 **3.3 - Transferring and Converting the Certificate**<br />
 Since the Raspberry Pi (and most Linux-based systems) requires certificates in a specific format and location for system-wide trust, the exported file must be transferred and converted. Then, transfer the file to the Raspberry Pi and since it is on the Raspberry, convert the .der file to the .crt format, which is standard for the local certificate store:
@@ -140,7 +143,7 @@ openssl x509 -inform der -in burp.der -out burp.crt
 ```
 <br />
 
-**3.3 - Installing the Certificate into the Trusted Root Store**<br />
+**3.4 - Installing the Certificate into the Trusted Root Store**<br />
 To ensure the Raspberry Pi trusts any certificate signed by Burp Suite, the .crt file must be moved to the system's certificate directory **/usr/local/share/ca-certificates/** and the local store must be updated:
 ```bash
 sudo update-ca-certificates
