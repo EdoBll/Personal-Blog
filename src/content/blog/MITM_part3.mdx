@@ -56,10 +56,33 @@ curl -v http://192.168.2.62:8080/ || true
 The ``ping`` to the proxy may fail, as noted previously. The ``nc`` command tests a TCP port (requires netcat).<br />
 We now reach the crucial part of the configuration: applying **DNAT** (<i>Destination Network Address Translation</i>) on the Raspberry. DNAT is a networking technique that changes the destination IP address of an IP packet as it traverses a router or firewall. In this specific context, DNAT will make the Raspberry send its traffic to the proxy (Burp) while still believing it is contacting the legitimate website directly (without explicitly using a proxy).<br />
 To apply DNAT we will use UFW. Specifically, edit **/etc/ufw/before.rules and add:
-```code
+```bash
 # DNAT for Burp (redirect HTTP from wlan1/eth0 to Burp)
 -A PREROUTING -i wlan1 -p tcp --dport 80 -j DNAT --to-destination 192.168.2.62:8080
 -A PREROUTING -i eth0  -p tcp --dport 80 -j DNAT --to-destination 192.168.2.62:8080
+```
+making it as follows:
+```code
+# NAT table rules
+*nat
+:PREROUTING ACCEPT [0:0]
+:POSTROUTING ACCEPT [0:0]
+
+# Masquerade LAN eth0 → WAN wlan0
+-A POSTROUTING -s 10.10.10.0/24 -o wlan0 -j MASQUERADE
+
+# Masquerade LAN wlan1 → WAN wlan0
+-A POSTROUTING -s 192.168.50.0/24 -o wlan0 -j MASQUERADE
+
+# DNAT per Burp (redirect HTTP da wlan1/eth0 a 192.168.2.62:8080)
+-A PREROUTING -i wlan1 -p tcp --dport 80 -j DNAT --to-destination 192.168.2.62:8080
+-A PREROUTING -i eth0  -p tcp --dport 80 -j DNAT --to-destination 192.168.2.62:8080
+
+COMMIT
+
+# Don't delete these required lines, otherwise there will be errors
+*filter
+.....
 ```
 With these rules, the Raspberry takes every packet arriving on interfaces wlan1/eth0 destined for port 80 on any given IP and redirects it to port 8080 on the IP where the proxy (Burp) is running.<br />
 To apply the changes, refresh UFW with the following commands:
@@ -70,4 +93,27 @@ sudo ufw enable
 sudo ufw status verbose
 ```
 
+<h4>3. Intercepting and Decrypting HTTPS Traffic</h4>
+Intercepting HTTPS traffic (port 443) is significantly more complex than standard HTTP due to the implementation of TLS/SSL encryption. If Burp Suite merely captures the packets, it will only see encrypted data. To analyze this traffic, the end-to-end chain of trust must be broken by positioning Burp Suite as an intermediate interpreter. This is achieved through a dual handshake process:
+<li> **Client Side (Raspberry Pi ↔ Burp Suite)**: Burp intercepts the request and masquerades as the destination server, generating a spoofed certificate (for example, for google.com) to present to the Raspberry Pi. Normally, the Raspberry Pi’s operating system would reject this certificate as invalid. To resolve this, the Burp CA certificate must be exported and installed into the Raspberry Pi’s Trusted Root store. Once installed, the system will trust and accept any certificate signed by Burp.
+<li> **Server Side (Burp Suite ↔ Web Server)**: simultaneously, Burp establishes a separate, independent connection to the actual web server, acting as the client itself.
+To enable this decryption and interception, several configurations must be performed.<br />
+
+**3.1 - UFW Configuration for Port 443**<br />
+To capture HTTPS traffic, additional rules for port 443 must be added to the **/etc/ufw/before.rules** file. These should be placed immediately after the existing rules for port 80:
+```bash
+*nat
+:PREROUTING ACCEPT [0:0]
+
+# HTTP Redirection from wlan1/eth0 to Burp Suite
+-A PREROUTING -i wlan1 -p tcp --dport 80 -j DNAT --to-destination 192.168.2.62:8080
+-A PREROUTING -i eth0 -p tcp --dport 80 -j DNAT --to-destination 192.168.2.62:8080
+
+# HTTPS Redirection from wlan1/eth0 to Burp Suite
+-A PREROUTING -i wlan1 -p tcp --dport 443 -j DNAT --to-destination 192.168.2.62:8080
+-A PREROUTING -i eth0 -p tcp --dport 443 -j DNAT --to-destination 192.168.2.62:8080
+
+COMMIT
+```
+As with previous steps, these modifications are persistent and will be automatically applied whenever UFW or the system is restarted.
 </p>
