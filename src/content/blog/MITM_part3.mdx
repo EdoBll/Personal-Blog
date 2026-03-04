@@ -42,3 +42,32 @@ curl -x http://192.168.2.62:8080 -k https://google.it
 If the request appears in Burp, TCP connectivity to the proxy is functioning even if ICMP ping fails.<br />
 Decrypting HTTPS requires generating **Burp’s Certificate Authority (CA)** and installing it on the test clients: without the CA, clients will reject the MITM connection as untrusted.
 </p>
+
+<p>
+<h4>2. Routing rules for the Raspberry</h4>
+On the Raspberry side, the first step is to ensure it has connectivity to the proxy and that it is using the correct interface (wlan0 as the upstream). Useful commands for an initial reachability check are:
+```bash
+ip addr show
+ip route show
+ping -c 4 192.168.2.62
+nc -vz 192.168.2.62 8080
+curl -v http://192.168.2.62:8080/ || true
+```
+The ``ping`` to the proxy may fail, as noted previously. The ``nc`` command tests a TCP port (requires netcat).<br />
+We now reach the crucial part of the configuration: applying **DNAT** (<i>Destination Network Address Translation</i>) on the Raspberry. DNAT is a networking technique that changes the destination IP address of an IP packet as it traverses a router or firewall. In this specific context, DNAT will make the Raspberry send its traffic to the proxy (Burp) while still believing it is contacting the legitimate website directly (without explicitly using a proxy).<br />
+To apply DNAT we will use UFW. Specifically, edit **/etc/ufw/before.rules and add:
+```code
+# DNAT for Burp (redirect HTTP from wlan1/eth0 to Burp)
+-A PREROUTING -i wlan1 -p tcp --dport 80 -j DNAT --to-destination 192.168.2.62:8080
+-A PREROUTING -i eth0  -p tcp --dport 80 -j DNAT --to-destination 192.168.2.62:8080
+```
+With these rules, the Raspberry takes every packet arriving on interfaces wlan1/eth0 destined for port 80 on any given IP and redirects it to port 8080 on the IP where the proxy (Burp) is running.<br />
+To apply the changes, refresh UFW with the following commands:
+```bash
+sudo ufw allow ssh
+sudo ufw disable
+sudo ufw enable
+sudo ufw status verbose
+```
+
+</p>
