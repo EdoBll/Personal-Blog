@@ -7,16 +7,6 @@ import SocialLinks from './SocialLinks.astro'; // <--- Importiamo il tuo compone
 
 <header>
 	<nav>
-		<div class="nav-left">
-			<h2><a href={import.meta.env.BASE_URL}>{SITE_TITLE}</a></h2>
-		</div>
-
-		<div class="internal-links" id="nav-menu">
-			<HeaderLink href={`${import.meta.env.BASE_URL}/`}>Home</HeaderLink>
-			<HeaderLink href={`${import.meta.env.BASE_URL}/blog`}>Blog</HeaderLink>
-			<HeaderLink href={`${import.meta.env.BASE_URL}/about`}>About</HeaderLink>
-		</div>
-
 		<div class="header-controls">
 			<div class="social-links-header">
 				<SocialLinks /> </div>
@@ -30,6 +20,16 @@ import SocialLinks from './SocialLinks.astro'; // <--- Importiamo il tuo compone
 					<line x1="3" y1="18" x2="21" y2="18"></line>
 				</svg>
 			</button>
+		</div>
+
+		<div class="nav-left">
+			<h2><a href={import.meta.env.BASE_URL}>{SITE_TITLE}</a></h2>
+		</div>
+
+		<div class="internal-links" id="nav-menu">
+			<HeaderLink href={`${import.meta.env.BASE_URL}/`}>Home</HeaderLink>
+			<HeaderLink href={`${import.meta.env.BASE_URL}/blog`}>Blog</HeaderLink>
+			<HeaderLink href={`${import.meta.env.BASE_URL}/about`}>About</HeaderLink>
 		</div>
 	</nav>
 </header>
