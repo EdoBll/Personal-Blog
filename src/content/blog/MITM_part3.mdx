@@ -134,7 +134,7 @@ The first step involves obtaining the CA certificate from the host machine where
 <br />
 <br />
 
-**3.3 - Understanding the Trust Chain**<br />
+**3.3 - Understanding the Trust Chain and Certificate Installation**<br />
 A critical aspect of the MITM architecture is the establishment of trust. Since the TLS handshake occurs directly between the target client and Burp Suite, the Burp CA certificate must be must be correctly integrated/installed into the trust store of the target operating system(for example, smartphone, IoT device, laptop, etc) that originate the traffic. 
 Below is a detailed technical breakdown of the installation process for the major platforms.
 <Note type="in-depth" Android>
@@ -152,10 +152,11 @@ The certificate file must be imported into either the Local Computer or Current 
 The certificate must be placed specifically in the <i>Trusted Root Certification Authorities</i>. Installing the certificate in the "Personal" or "Intermediate" stores will cause TLS validation to fail during the handshake.
 </Note>
 
-<Note type="in-depth" macOS>
+<Note type="in-depth" title="macOS">
 The **Keychain Access** utility is used for certificate management. The certificate file should be dragged into the "System" keychain. Once imported, the certificate will initially appear as "Not Trusted." To resolve this, the user must double-click the certificate, expand the "Trust" section, and change the setting for "When using this certificate" to "**Always Trust**". This ensures that Safari, Chrome, and system-level services accept the proxy's intercepted traffic.
 </Note>
 <br />
+Following the installation of the certificate on the target device, the success of the interception can be verified by observing the <i>Proxy → HTTP history</i> tab in Burp Suite. If the configuration is functional, HTTPS requests will appear in plaintext, allowing for the full inspection of headers and application-layer payloads that were previously encapsulated within the TLS tunnel.
 
 **3.4 - Certificate Installation on the Raspberry Pi (optional)**<br />
 To intercept also the traffic generated locally by the Raspberry Pi (such as updates or CLI-based requests), the certificate must be added to the system’s trust store.<br />
@@ -170,4 +171,3 @@ sudo update-ca-certificates
 ```
 The command output should confirm the addition of one new certificate.
 <br />
-Following the installation of the certificate on the target device, the success of the interception can be verified by observing the <i>Proxy → HTTP history</i> tab in Burp Suite. If the configuration is functional, HTTPS requests will appear in plaintext, allowing for the full inspection of headers and application-layer payloads that were previously encapsulated within the TLS tunnel.

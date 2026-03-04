@@ -71,8 +71,17 @@ import SocialLinks from './SocialLinks.astro'; // <--- Importiamo il tuo compone
 		margin: 0 auto;
 	}
 
-	h2 { margin: 0; font-size: 1.2em; white-space: nowrap; }
-	h2 a { text-decoration: none; color: inherit; }
+	h2 { 
+        margin: 0; 
+        font-size: 1em; /* Ridotto da 1.2em per pareggiare Home, Blog, About */
+        font-weight: 500; /* Opzionale: un peso medio lo rende leggibile ma non pesante */
+        white-space: nowrap; 
+    }
+
+    h2 a { 
+        text-decoration: none; 
+        color: inherit; 
+    }
 
 	.internal-links {
 		display: flex;
