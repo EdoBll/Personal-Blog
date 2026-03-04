@@ -154,7 +154,7 @@ The first step consist into enable persistent IPv4 forwarding by adding or uncom
 ```bash
 net/ipv4/ip_forward=1 .
 ```
-<Note type="in-depth">
+<Note type="in-depth" title="UFW">
 This file is provided precompiled and commented (or empty on some distro) and is read by UFW to apply any specific sysctl settings. **UFW** (**Uncomplicated Firewall**) is the default firewall interface on Ubuntu Server and acts as a simplification for **iptables** , a very powerful but yet equally complex tool. UFW's main job is to decide which traffic can enter or exit our server.
 <br />However, keep in mind that UFW may not be installed by default (for example, in the case of minimal systems such as those designed for Raspberry Pi), so before proceeding, let's install/update it using:
 ``sudo apt install ufw -y``

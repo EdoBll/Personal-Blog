@@ -137,17 +137,17 @@ The first step involves obtaining the CA certificate from the host machine where
 **3.3 - Understanding the Trust Chain and Certificate Installation**<br />
 A critical aspect of the MITM architecture is the establishment of trust. Since the TLS handshake occurs directly between the target client and Burp Suite, the Burp CA certificate must be must be correctly integrated/installed into the trust store of the target operating system(for example, smartphone, IoT device, laptop, etc) that originate the traffic. 
 Below is a detailed technical breakdown of the installation process for the major platforms.
-<Note type="in-depth" Android>
+<Note type="in-depth" title="Android">
 The certificate file (``burp.der`` or ``burp.crt``) must be copied to the device’s internal storage and installed via <i>Settings → Security → Encryption & credentials → Install from storage</i> (menu labels may vary by manufacturer). When prompted, select the certificate and install it as a **VPN and apps credential** or as a **CA certificate**.<br />
 <i>Note for Android 7.0 (API level 24) and later:</i> modern Android apps do not trust user‑installed CA certificates by default. To intercept traffic from specific apps, either configure those apps to accept user CAs via a custom <i>network_security_config.xml</i>, or move the certificate into the system trust store (which requires root access).
 </Note>
 
-<Note type="in-depth" iOS>
+<Note type="in-depth" title="iOS">
 The installation on iOS is a two-stage process. First, the certificate must be downloaded (usually via Safari or sent as an email attachment), which triggers a "Profile Downloaded" notification. The user must then navigate to <i>Settings → General → VPN & Device Management</i> to install the profile.
 Second, and most critically, the certificate must be manually granted full trust. This is done by navigating to <i>Settings → General → About → Certificate Trust Settings</i> and toggling the switch for the Burp CA under "**Enable full trust for root certificates**".
 </Note>
 
-<Note type="in-depth" Microsoft Windows>
+<Note type="in-depth" title="Microsoft Windows">
 The certificate file must be imported into either the Local Computer or Current User certificate store. Open the Certificate Manager (certmgr.msc) or double‑click the certificate file to launch the <i>Certificate Import Wizard</i>, then follow the prompts.<br />
 The certificate must be placed specifically in the <i>Trusted Root Certification Authorities</i>. Installing the certificate in the "Personal" or "Intermediate" stores will cause TLS validation to fail during the handshake.
 </Note>
