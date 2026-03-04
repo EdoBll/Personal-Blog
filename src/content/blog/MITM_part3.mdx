@@ -10,18 +10,34 @@ import Note from '../../components/Note.astro';
 
 <p>
 In the first two parts of the series, a Raspberry Pi was configured as a robust network monitoring station.<br />
-<a href="https://edobll.github.io/Personal-Blog/blog/mitm_part1/"> `Part 1`</a>, established routing and monitoring on the Ethernet interface. 
-<a href="https://edobll.github.io/Personal-Blog/blog/mitm_part2/"> `Part 2`</a>, introduced a dedicated Wi‑Fi Access Point, enabling IoT devices to connect and be monitored without cables.<br />
+<a href="https://edobll.github.io/Personal-Blog/blog/mitm_part1/"> <i>**Part 1**</i></a>, established routing and monitoring on the Ethernet interface. 
+<a href="https://edobll.github.io/Personal-Blog/blog/mitm_part2/"> <i>**Part 2**</i></a>, introduced a dedicated Wi‑Fi Access Point, enabling IoT devices to connect and be monitored without cables.<br />
 However, observing raw packet flows with `tcpdump` or `Wireshark` encounters a fundamental limitation: encryption. In contemporary networks, the majority of traffic is carried over HTTPS, which obscures application‑layer behavior and hinders interpretation of device activity.<br />
-To enable interception and interaction with HTTP/S requests, two proxy approaches are available: an `explicit proxy` and a `transparent proxy`. The explicit proxy is the simpler and more robust option, as it avoids routing complications and preserves TLS handling. However, it requires clients to be proxy‑aware, a condition commonly met by PCs and smartphones but often absent in many IoT devices. For non‑proxy‑aware clients, a transparent proxy can be employed to redirect HTTP traffic to the proxy without any client‑side configuration.<br />
-In this article, for broader coverage and compatibility with diverse target devices, a transparent proxy will be implemented on the same network as wlan0. This configuration intercepts all HTTP traffic (port 80) associated with the wlan1 and eth0 interfaces and forwards it to **Burp Suite** for inspection and manipulation. Decrypting HTTPS traffic requires an additional step: generating `Burp’s Certificate Authority (CA)` and installing it on the test clients, since clients will otherwise reject the MITM connection as untrusted.<br />
-These configurations transform passive observation into a practical framework for comprehensive security assessment.
+To enable interception and interaction with HTTP/S requests, two proxy approaches are available: an <i>explicit proxy</i> and a <i>transparent proxy</i>. The explicit proxy is the simpler and more robust option, as it avoids routing complications and preserves TLS handling. However, it requires clients to be proxy‑aware, a condition commonly met by PCs and smartphones but often absent in many IoT devices.<br />
+In this article, for broader coverage and compatibility with different target devices, a **transparent proxy** will be implemented on the same network as wlan0. This configuration intercepts all HTTP traffic (port 80) associated with the wlan1 and eth0 interfaces and forwards it to **Burp Suite** for inspection and manipulation. Decrypting HTTPS traffic requires an additional step: generating <i>Burp’s Certificate Authority (CA)</i> and installing it on the test clients, since clients will otherwise reject the MITM connection as untrusted.<br />
+Mastering these configurations elevates passive monitoring into a capable platform for thorough security analysis.
 </p>
 
-<Image src={mitmDiagram} alt="MITM diagram not complete" />
+<Image src={mitmDiagram} alt="MITM_final" />
 
 <br />
 <br />
-
+<p>
 <h4>1. Burp Suite configuration on the host machine</h4>
-........
+The host running Burp must be reachable from the Raspberry Pi via wlan0: in other words, the proxy and the Raspberry’s wlan0 interface must reside on the same subnet. In this example, the Burp host uses IP 192.168.2.62 while the Raspberry’s wlan0 (the interface handling Internet access) is 192.168.2.108.<br />
+Burp should be configured to accept remote/invisible connections and to listen on 192.168.2.62 (or on all interfaces) using a dedicated port (for example 8080). If supported by the Burp version in use, enabling invisible proxy is recommended so Burp can receive requests that are not in explicit proxy format; this feature is useful for DNAT‑based transparent proxying. Additionally, the firewall and routing rules must permit connections from the Raspberry and from clients on the wlan1 and eth0 subnets to the Burp host IP.<br />
+To verify that the host is listening on the chosen port, run the appropriate command for the platform:
+```code
+# Windows
+netstat -an | findstr :8080
+
+# Linux
+ss -ant | grep :8080
+```
+Expected output is ``0.0.0.0:8080`` or ``192.168.2.62:8080`` in **LISTEN** state. Do not be surprised if the Raspberry cannot ping the Burp host at this stage: ICMP and TCP are handled separately by firewalls. For example, Windows may block ICMP while leaving TCP port 8080 open.<br /> 
+To confirm TCP reachability to Burp, issue an HTTP request through the proxy:
+```bash
+curl -x http://192.168.2.62:8080 -k https://google.it
+```
+If the request appears in Burp, TCP connectivity to the proxy is functioning even if ICMP ping fails.<br />
+Decrypting HTTPS requires generating **Burp’s Certificate Authority (CA)** and installing it on the test clients: without the CA, clients will reject the MITM connection as untrusted.
