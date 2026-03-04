@@ -9,7 +9,7 @@ import mitmDiagram from '../../assets/MITM_final.png';
 import burpca from '../../assets/BurpCA.jpg';
 import Note from '../../components/Note.astro';
 
-<p>
+
 In the first two parts of the series, a Raspberry Pi was configured as a robust network monitoring station.<br />
 <a href="https://edobll.github.io/Personal-Blog/blog/mitm_part1/"> **Part 1**</a>, established routing and monitoring on the Ethernet interface. 
 <a href="https://edobll.github.io/Personal-Blog/blog/mitm_part2/"> **Part 2**</a>, introduced a dedicated Wi‑Fi Access Point, enabling IoT devices to connect and be monitored without cables.<br />
@@ -17,14 +17,14 @@ However, observing raw packet flows with `tcpdump` or `Wireshark` encounters a f
 To enable interception and interaction with HTTP/S requests, two proxy approaches are available: an <i>explicit proxy</i> and a <i>transparent proxy</i>. The explicit proxy is the simpler and more robust option, as it avoids routing complications and preserves TLS handling. However, it requires clients to be proxy‑aware, a condition commonly met by PCs and smartphones but often absent in many IoT devices.<br />
 In this article, for broader coverage and compatibility with different target devices, a **transparent proxy** will be implemented on the same network as wlan0. This configuration intercepts all HTTP traffic (port 80) associated with the wlan1 and eth0 interfaces and forwards it to **Burp Suite** for inspection and manipulation. Decrypting HTTPS traffic requires an additional step: generating <i>Burp’s Certificate Authority (CA)</i> and installing it on the test clients, since clients will otherwise reject the MITM connection as untrusted.<br />
 Mastering these configurations elevates passive monitoring into a capable platform for thorough security analysis.
-</p>
+
 
 <Image src={mitmDiagram} alt="MITM_final" />
 
 <br />
 <br />
 <br />
-<p>
+
 <h4>1. Burp Suite configuration on the host machine</h4>
 The host running Burp must be reachable from the Raspberry Pi via wlan0: in other words, the proxy and the Raspberry’s wlan0 interface must reside on the same subnet. In this example, the Burp host uses IP 192.168.2.62 while the Raspberry’s wlan0 (the interface handling Internet access) is 192.168.2.108.<br />
 Burp should be configured to accept remote/invisible connections and to listen on 192.168.2.62 (or on all interfaces) using a dedicated port (for example 8080). If supported by the Burp version in use, enabling invisible proxy is recommended so Burp can receive requests that are not in explicit proxy format; this feature is useful for DNAT‑based transparent proxying. Additionally, the firewall and routing rules must permit connections from the Raspberry and from clients on the wlan1 and eth0 subnets to the Burp host IP.<br />
@@ -43,10 +43,10 @@ curl -x http://192.168.2.62:8080 -k https://google.it
 ```
 If the request appears in Burp, TCP connectivity to the proxy is functioning even if ICMP ping fails.<br />
 Decrypting HTTPS requires generating **Burp’s Certificate Authority (CA)** and installing it on the test clients: without the CA, clients will reject the MITM connection as untrusted.
-</p>
+
 <br />
 
-<p>
+
 <h4>2. Routing rules for the Raspberry</h4>
 On the Raspberry side, the first step is to ensure it has connectivity to the proxy and that it is using the correct interface (wlan0 as the upstream). Useful commands for an initial reachability check are:
 ```bash
@@ -95,15 +95,15 @@ sudo ufw disable
 sudo ufw enable
 sudo ufw status verbose
 ```
-</p>
+
 <br />
 
 <p>
 <h4>3. Intercepting and Decrypting HTTPS Traffic</h4>
 Intercepting HTTPS traffic (port 443) is significantly more complex than standard HTTP due to the implementation of TLS/SSL encryption. If Burp Suite merely captures the packets, it will only see encrypted data. To analyze this traffic, the end-to-end chain of trust must be broken by positioning Burp Suite as an intermediate interpreter. This is achieved through a dual handshake process:
 
-- **Client Side (Raspberry Pi ↔ Burp Suite)**: Burp intercepts the request and masquerades as the destination server, generating a spoofed certificate (for example, for google.com) to present to the Raspberry Pi. Normally, the Raspberry Pi’s operating system would reject this certificate as invalid. To resolve this, the Burp CA certificate must be exported and installed into the Raspberry Pi’s Trusted Root store. Once installed, the system will trust and accept any certificate signed by Burp.</li>
-- **Server Side (Burp Suite ↔ Web Server)**: simultaneously, Burp establishes a separate, independent connection to the actual web server, acting as the client itself.</li><br />
+- **Client Side (Raspberry Pi ↔ Burp Suite)**: Burp intercepts the request and masquerades as the destination server, generating a spoofed certificate (for example, for google.com) to present to the Raspberry Pi. Normally, the Raspberry Pi’s operating system would reject this certificate as invalid. To resolve this, the Burp CA certificate must be exported and installed into the Raspberry Pi’s Trusted Root store. Once installed, the system will trust and accept any certificate signed by Burp.
+- **Server Side (Burp Suite ↔ Web Server)**: simultaneously, Burp establishes a separate, independent connection to the actual web server, acting as the client itself.<br />
 To enable this decryption and interception, several configurations must be performed.
 <br />
 
