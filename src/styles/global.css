@@ -81,16 +81,17 @@ main {
 /* Da qui: Modificato lo stile per aumentare la larghezza massima da 720px a 960px 
            (gold standard per blog tecnici ed ottimo compromesso tra estetica e leggibilità) */
 
-		   /* --- STILE DEL TESTO NELL'ARTICOLO --- */
+/* --- STILE DEL TESTO NELL'ARTICOLO --- */
 
-/* Applichiamo la giustificazione ai paragrafi degli articoli, della Home e del contenuto Markdown (.prose) */
-article p, main p, .prose p {
+/* Applichiamo la giustificazione a paragrafi E liste per coprire tutto il testo del blog */
+article p, 
+main p, 
+.prose p, 
+.prose li {
   text-align: justify;
   text-justify: inter-word;
   hyphens: auto;
-  text-align-last: left;
-  width: 100% !important;
-  max-width: 100% !important;
+  text-align-last: left; /* Mantiene l'ultima riga allineata a sinistra (fondamentale!) */
 }
 
 /* Sblocca la larghezza per gli elementi strutturali */
@@ -101,26 +102,20 @@ article p, main p, .prose p {
   margin-right: auto !important;
 }
 
-/* Regole per liste e intestazioni interne (h2, h3, h4) */
-article ul, 
-article ol, 
-article h2, 
-article h3, 
-article h4,
-.prose h2,
-.prose h3,
-.prose h4 {
-  width: 100% !important;
-  max-width: 100% !important;
-  text-align: left; /* Questi elementi rimangono allineati a sinistra come desiderato */
+/* Manteniamo i titoli allineati a sinistra per contrasto estetico */
+article h2, article h3, article h4,
+.prose h2, .prose h3, .prose h4 {
+  text-align: left !important;
 }
 
-/* --- BLOCCHI DI CODICE --- */
-pre {
-  width: 100%;
-  margin: 1.5rem 0;
-  border-radius: 8px;
+/* ECCEZIONE: Le note e i blocchi di codice devono rimanere allineati a sinistra */
+.note-content, 
+.note-content p, 
+.note-content li,
+pre, 
+code {
   text-align: left !important;
+  text-justify: none !important;
   hyphens: none !important;
 
 /* I vecchi valori originali prima presenti soltanto in "main" e che 
