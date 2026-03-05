@@ -2,7 +2,7 @@
 title: 'Integrating Burp Suite for Advanced MITM Monitoring'
 description: ''
 pubDate: 'March 05 2026'
-heroImage: '../../assets/MITM_3.jpg'
+heroImage: '../../assets/MITM_32.jpg'
 ---
 import { Image } from 'astro:assets';
 import mitmDiagram from '../../assets/MITM_final.png';
@@ -174,7 +174,7 @@ The command output should confirm the addition of one new certificate.
 <br />
 <br />
 
-<h4>Technical Limitation and Security Measures</h4>
+<h4>4. Technical Limitation and Security Measures</h4>
 Despite a correct configuration, HTTPS interception may be obstructed by device limitations and advanced security mechanisms.<br />
 Many **IoT devices** operate inside closed ecosystems with proprietary, read‑only firmware and no administrative interface or command‑line access for managing the root certificate store. In many instances, trust anchors are hardcoded directly into the hardware, preventing the device from being configured to recognize a third-party proxy Certificate Authority (CA). When such a device encounters a proxy-generated certificate during a TLS handshake, it identifies the discrepancy as a fundamental security violation. Consequently, the device will immediately terminate the connection to prevent a perceived breach, leading to a complete loss of network connectivity rather than the intended decryption of traffic.<br />
 Other times, high-security mobile applications and sophisticated hardware often employ **Certificate Pinning** to shift the validation process from the operating system directly to the application layer. By hardcoding a specific public key or certificate within the application binary, the software effectively bypasses the system’s global trust store. Even if the Burp CA is successfully installed at the OS level, a <i>pinned</i> application will still reject the proxy connection because the presented certificate does not match its internal (and immutable) requirements. Overcoming this level of protection necessitates advanced binary instrumentation, such as using Frida to modify the application's logic at runtime, which is a significantly more invasive process.

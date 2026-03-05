@@ -83,8 +83,8 @@ main {
 
 		   /* --- STILE DEL TESTO NELL'ARTICOLO --- */
 
-/* Applichiamo la giustificazione ai paragrafi degli articoli e della Home/pagine generali */
-article p, main p {
+/* Applichiamo la giustificazione ai paragrafi degli articoli, della Home e del contenuto Markdown (.prose) */
+article p, main p, .prose p {
   text-align: justify;
   text-justify: inter-word;
   hyphens: auto;
@@ -106,10 +106,13 @@ article ul,
 article ol, 
 article h2, 
 article h3, 
-article h4 {
+article h4,
+.prose h2,
+.prose h3,
+.prose h4 {
   width: 100% !important;
   max-width: 100% !important;
-  text-align: left; /* Questi elementi non devono essere giustificati */
+  text-align: left; /* Questi elementi rimangono allineati a sinistra come desiderato */
 }
 
 /* --- BLOCCHI DI CODICE --- */
@@ -337,3 +340,4 @@ main {
   padding: 3em 1em; /* Spazio per evitare che il testo tocchi i bordi su mobile */
   box-sizing: border-box;
 }
+
